@@ -1,0 +1,76 @@
+/* ============================================================
+   Cricket Match Manager - animations (edit freely in Acode)
+   Remove the <link rel="stylesheet" href="animations.css"> line in index.html to turn all animations off.
+   ============================================================ */
+html{scroll-behavior:smooth}
+
+/* ---- Page change: fade + slide up (restarts every time a page is shown) ---- */
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}}
+[data-page]:not(.pghide){animation:pageIn .35s ease-out backwards}
+
+/* ---- Buttons: smooth hover + press feedback ---- */
+button,.small-btn,select,input{transition:transform .12s ease,box-shadow .2s ease,background-color .2s ease,border-color .2s ease,color .2s ease}
+button:active:not(:disabled){transform:scale(.96)}
+@media (hover:hover){
+  button.primary:hover{box-shadow:0 4px 14px rgba(29,90,56,.35);transform:translateY(-1px)}
+  .card{transition:box-shadow .25s ease}
+  .card:hover{box-shadow:0 6px 22px rgba(18,61,38,.12)}
+  tbody tr{transition:background-color .15s ease}
+  tbody tr:hover{background:#f3f8f4}
+}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(29,90,56,.18)}
+
+/* ---- Menu bar ---- */
+.mainnav button{transition:background-color .25s ease,color .25s ease,transform .15s ease}
+@keyframes navPop{0%{transform:scale(.9)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.mainnav button.on{animation:navPop .3s ease-out}
+@keyframes badgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.mainnav .nb{display:inline-block;animation:badgePulse 1.6s ease-in-out infinite}
+
+/* ---- Logo ball (header) ---- */
+@keyframes ballBounce{0%,100%{transform:translateY(0) rotate(0)}40%{transform:translateY(-6px) rotate(-12deg)}70%{transform:translateY(0) rotate(6deg)}}
+.ball{display:inline-block;animation:ballBounce 2.6s ease-in-out infinite;transform-origin:50% 80%}
+
+/* ---- Login / waiting screens ---- */
+@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.96)}}
+.auth-card{animation:cardIn .55s cubic-bezier(.2,.8,.2,1) backwards}
+
+/* ---- Toast (undo bar) ---- */
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,24px)}}
+.toast:not(.hidden){animation:toastIn .3s ease-out}
+
+/* ---- Popups / modals ---- */
+@keyframes fadeIn{from{opacity:0}}
+@keyframes popIn{from{opacity:0;transform:scale(.9) translateY(10px)}}
+.modal:not(.hidden){animation:fadeIn .2s ease-out}
+.modal:not(.hidden) .box{animation:popIn .28s cubic-bezier(.2,.8,.2,1)}
+
+/* ---- Live countdown popup ---- */
+@keyframes cdIn{from{opacity:0;transform:translateY(-22px) scale(.97)}}
+.cdcard{animation:cdIn .45s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes cdTick{0%,100%{opacity:1}50%{opacity:.82}}
+.cdcard:not(.now) .cdt{animation:cdTick 1s steps(1) infinite}
+
+/* ---- Warning marks ---- */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes shake{0%,100%{transform:rotate(0)}15%{transform:rotate(-14deg)}30%{transform:rotate(12deg)}45%{transform:rotate(-8deg)}60%{transform:rotate(6deg)}75%{transform:rotate(0)}}
+[title="Overlaps another match"]{display:inline-block;animation:blink 1.4s ease-in-out infinite}
+[title="Upload overdue"]{display:inline-block;animation:shake 1.6s ease-in-out infinite;transform-origin:50% 0}
+
+/* ---- Charts / planner bars grow in ---- */
+@keyframes growX{from{transform:scaleX(0)}}
+.cbar i{transform-origin:left;animation:growX .8s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes barIn{from{opacity:0;transform:scaleX(.6)}}
+.tl-bar{transform-origin:left;animation:barIn .5s ease-out backwards}
+
+/* ---- Status pills fade when they change ---- */
+.pill,.st-select{transition:background-color .3s ease,color .3s ease,border-color .3s ease}
+
+/* ---- Loading text ---- */
+@keyframes breathe{0%,100%{opacity:.45}50%{opacity:1}}
+#authMsg:not(:empty){animation:breathe 1.4s ease-in-out infinite}
+
+/* ---- Respect phones with "reduce motion" turned on ---- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}

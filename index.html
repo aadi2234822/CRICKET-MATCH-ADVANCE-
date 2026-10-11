@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1d5a38">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="animations.css">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cricket Manager">
+<title>Cricket Match Manager - Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16231b;--muted:#5d6b62;--turf:#1d5a38;--turf-dark:#123d26;--chalk:#f4f6f0;--paper:#fff;--line:#dce2d6;--field:#c6cfc2;--leather:#b3382a;--amber:#a86a00;--mint:#e6f0e8;--yellow:#FFD600}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:'Barlow',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:16px;line-height:1.45;background:var(--chalk);color:var(--ink)}
+.container{max-width:1200px;margin:auto;padding:14px}
+h1,h2{font-family:'Barlow Condensed','Barlow',Arial,sans-serif;font-weight:700;letter-spacing:.2px}
+header{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:16px;padding:20px 22px;border-radius:12px;color:#fff;background:repeating-linear-gradient(90deg,#174a2f 0 56px,#1b5638 56px 112px)}
+header h1{margin:0;font-size:34px;line-height:1.05}
+header p{margin:4px 0 0;color:#cfe3d4;font-size:15px}
+.userbar{display:flex;align-items:center;gap:10px;font-size:14px;flex-wrap:wrap}
+.userbar button{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+.card>h2,.toolbar h2{margin:0 0 16px;font-size:24px;color:var(--turf-dark)}
+.card>h2{padding-bottom:10px;border-bottom:2px solid var(--turf)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.wide{grid-column:span 2}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px;color:var(--ink)}
+input,select,textarea{font:inherit;font-weight:400;border:1px solid var(--field);border-radius:8px;padding:10px 11px;background:#fff;color:var(--ink);min-height:44px;width:100%}
+input[readonly]{background:#f0f3ed;color:var(--muted)}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #9cc9ac;outline-offset:1px;border-color:var(--turf)}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+button{font:inherit;font-weight:600;border:1px solid var(--field);border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer;background:#fff;color:var(--ink);transition:background .15s,border-color .15s}
+button:hover{background:var(--mint);border-color:var(--turf)}
+button:disabled{opacity:.55;cursor:wait}
+.primary{background:var(--turf);border-color:var(--turf);color:#fff}
+.primary:hover{background:var(--turf-dark);border-color:var(--turf-dark)}
+.danger{background:#fff;border-color:var(--leather);color:var(--leather)}
+.danger:hover{background:var(--leather);border-color:var(--leather);color:#fff}
+.toolbar{display:flex;justify-content:space-between;gap:15px;align-items:end;margin-bottom:14px}
+.toolbar h2{display:inline-block;margin:0 8px 10px 0}
+.toolbar .actions{margin:0}
+.month-downloads{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
+.month-downloads:empty{display:none}
+.month-download-btn{background:var(--turf);border-color:var(--turf);color:#fff}
+.month-download-btn:hover{background:var(--turf-dark);border-color:var(--turf-dark)}
+.search{width:320px;display:block}
+.badge{font-family:'Barlow',Arial,sans-serif;font-size:14px;font-weight:700;background:var(--turf);color:#fff;padding:2px 10px;border-radius:20px;vertical-align:middle}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:1800px;background:#fff}
+th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px;vertical-align:top}
+th{background:#eaf0e6;color:var(--turf-dark);font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:#fafbf8}
+tbody tr:last-child td{border-bottom:0}
+.small-btn{padding:6px 12px;font-size:13px;min-height:36px}
+.edit{background:#fff;border-color:var(--turf);color:var(--turf)}
+.delete{background:#fff;border-color:var(--leather);color:var(--leather)}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid}
+.pill.done{background:var(--mint);color:var(--turf-dark);border-color:#9cc9ac}
+.pill.pending{background:#fff4dc;color:var(--amber);border-color:#e9c77d}
+.empty{text-align:center;color:var(--muted);padding:26px}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.kpi{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff}.kpi strong{display:block;font-size:28px;color:var(--turf-dark)}.kpi span{font-size:13px;color:var(--muted)}.calendar-list{display:grid;gap:8px}.calendar-item{display:grid;grid-template-columns:105px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px}.calendar-date{font-weight:700;color:var(--turf-dark)}.muted{color:var(--muted)}.status-msg{white-space:pre-line;color:var(--muted);font-size:14px;margin-top:8px}
+@media(max-width:800px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.calendar-item{grid-template-columns:1fr}.calendar-item button{justify-self:start}}
+.auth{min-height:100vh;display:grid;place-items:center;padding:20px}
+.auth-card{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;padding:0 24px 24px}
+.auth-card::before{content:"";display:block;height:14px;margin:0 -24px 22px;background:repeating-linear-gradient(90deg,#174a2f 0 28px,#1b5638 28px 56px)}
+.auth-card h1{margin:0 0 4px;font-size:32px;color:var(--turf-dark)}
+.auth-card p{margin:0 0 14px;color:var(--muted)}
+.auth-card form{display:grid;gap:12px}
+.link-btn{margin-top:12px;background:none;border:0;color:var(--turf);text-decoration:underline;padding:8px 0}
+.link-btn:hover{background:none}
+.hidden{display:none!important}
+#authMsg{color:var(--leather);min-height:20px;margin:8px 0 0}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:8px 0 24px}
+.remarks-input{border:1px solid var(--field);border-radius:8px}
+td.remarks-cell{border-bottom:1px solid var(--line);background:transparent}
+.timebox{display:flex;gap:4px}
+.timebox select{padding:9px 6px;min-width:0;flex:1}
+#timeBox{display:block}
+.dgroup{border:1px solid var(--line);border-left:4px solid var(--turf);border-radius:10px;padding:14px;margin-top:14px;background:#fafbf8}
+.dgroup-head{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:10px}
+.dgroup-head label{max-width:170px}
+.mline{display:grid;grid-template-columns:200px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
+.mline .timebox{width:200px}
+.small-btn.rm{background:#fff;border-color:var(--leather);color:var(--leather)}
+#afMsg{color:var(--muted);white-space:pre-line;margin:12px 0 0}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.toolbar{flex-direction:column;align-items:stretch}.search{width:100%}}
+@media(max-width:700px){
+ .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:10px}
+ table{min-width:1800px;width:1800px;border-collapse:collapse}
+ thead{display:table-header-group}
+ tbody{display:table-row-group}
+ tbody tr{display:table-row;border:0;border-radius:0;margin:0;padding:0;background:#fff!important}
+ tbody td{display:table-cell;justify-content:initial;gap:initial;border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;white-space:normal}
+ tbody td::before{content:none}
+ td.remarks-cell{margin:0;border-bottom:1px solid var(--line);border-radius:0;width:auto;background:transparent}
+ tbody td:last-child{border-bottom:1px solid var(--line);justify-content:initial;gap:initial}
+ tbody td:last-child::before{display:none}
+ th,td{font-size:13px}
+}
+@media(max-width:620px){.mline{grid-template-columns:1fr auto}.mline .timebox{grid-column:1/3;width:100%}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.wide{grid-column:span 1}header{flex-direction:column;align-items:flex-start}header h1{font-size:30px}.container{padding:10px}.card{padding:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.notice{padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:14px;font-weight:600}
+.notice.warn{background:#fff4dc;color:var(--amber);border:1px solid #e9c77d}
+.notice.off{background:#fdecea;color:var(--leather);border:1px solid #f0b4ad}
+.st-select{min-height:36px;padding:4px 6px;font-size:13px;font-weight:600;border-radius:20px;width:auto;min-width:112px}
+.st-Scheduled{background:#eef2f7;border-color:#b8c4d6}
+.st-Recording{background:#fff4dc;border-color:#e9c77d;color:var(--amber)}
+.st-Recorded,.st-Editing{background:#e3f0fb;border-color:#9bc2e6;color:#1b5a8a}
+.st-Uploaded{background:var(--mint);border-color:#9cc9ac;color:var(--turf-dark)}
+.st-Postponed,.st-Abandoned,.st-Cancelled{background:#f3f3f3;border-color:#c9c9c9;color:#666}
+.att-item{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.att-item.soon{border-left-color:var(--turf)}.att-item.late{border-left-color:var(--leather)}
+.att-item small{display:block;color:var(--muted)}
+.rem-note{color:var(--muted);font-size:13px;margin:10px 0 0}
+.inline-check{flex-direction:row;align-items:center;gap:8px}.inline-check input{width:auto;min-height:0}
+.rowchk{width:20px!important;min-height:0!important;height:20px;accent-color:var(--turf)}
+.bulkbar{position:sticky;top:0;z-index:6;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#123d26;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.bulkbar select,.bulkbar input{width:auto;min-height:38px;padding:4px 8px}
+.bulkbar button{min-height:38px;padding:4px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));z-index:50;background:#16231b;color:#fff;border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.3);max-width:92vw}
+.toast button{min-height:34px;padding:4px 12px;background:#FFD600;color:#16231b;border-color:#FFD600}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;display:grid;place-items:center;padding:16px}
+.modal .box{background:#fff;border-radius:14px;padding:18px;width:min(440px,100%);max-height:92vh;overflow:auto}
+.modal h3{margin:0 0 4px;font-family:'Barlow Condensed',Arial,sans-serif;font-size:24px;color:var(--turf-dark)}
+.ck-row{display:flex;flex-direction:row;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-weight:500}
+.ck-row input{width:22px;min-height:0;height:22px;accent-color:var(--turf)}
+.ucard{border:1px solid var(--line);border-left:4px solid var(--turf);border-radius:10px;padding:12px;margin-bottom:10px;background:#fff}
+.ucard.pend{border-left-color:var(--amber);background:#fffaf0}
+.uhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;word-break:break-all}
+.ugrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}
+.uperms{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0}
+.uperms label{flex-direction:row;align-items:center;gap:6px;font-weight:500}
+.uperms input,.ugrid .inline-check input{width:18px;min-height:0;height:18px;accent-color:var(--turf)}
+@media(max-width:620px){.ugrid{grid-template-columns:1fr}}
+.tl-row{display:flex;align-items:center;margin-bottom:6px}.tl-lab{width:96px;font-size:12px;font-weight:700;flex:none}
+.tl-lane{position:relative;flex:1;height:34px;background:#f1f5f2;border-radius:6px;background-image:linear-gradient(90deg,#d3ddd6 1px,transparent 1px);background-size:12.5% 100%}
+.tl-bar{position:absolute;top:3px;bottom:3px;border-radius:5px;padding:2px 6px;font-size:11px;overflow:hidden;white-space:nowrap;color:#fff;background:var(--turf);border:1px solid #0003}
+.tl-bar.s-Scheduled{background:#5b7bd6}.tl-bar.s-Recording{background:var(--amber)}.tl-bar.s-Recorded,.tl-bar.s-Editing{background:#2b7bb9}
+.statsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.chart h3{margin:0 0 6px;font-size:15px}
+.crow{display:flex;align-items:center;gap:8px;font-size:13px;margin:4px 0}.crow span{width:92px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.crow b{width:28px;text-align:right}
+.cbar{background:#e8eee9;border-radius:6px;overflow:hidden;height:12px;flex:1}.cbar i{display:block;height:100%;background:var(--turf)}
+#adm2 h3{margin:18px 0 8px;font-size:17px;color:var(--turf-dark)}
+.strg label{display:flex;flex-direction:row;gap:6px;align-items:center;font-weight:500;width:auto}.strg input{width:18px;min-height:0;height:18px;accent-color:var(--turf)}
+.pghide{display:none!important}
+.mainnav{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;background:#123d26;padding:8px 10px;margin:0 0 12px;border-radius:0 0 12px 12px;scrollbar-width:none}
+.mainnav::-webkit-scrollbar{display:none}
+.mainnav button{flex:none;min-height:38px;padding:4px 14px;border-radius:20px;background:#1d5a38;color:#fff;border:1px solid #2f7a52;font-weight:600;font-size:14px;position:relative}
+.mainnav button.on{background:#FFD600;color:#16231b;border-color:#FFD600}
+.mainnav .nb{font-style:normal;background:#b3382a;color:#fff;border-radius:10px;font-size:11px;padding:1px 6px;margin-left:6px}
+.bulkbar{top:58px}
+.cdpop{position:fixed;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top,0px));z-index:35;width:min(430px,94vw);display:flex;flex-direction:column;gap:8px}
+.cdcard{background:#123d26;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.35);border:2px solid #FFD600;position:relative}
+.cdcard.now{background:#b3382a;animation:cdp 1s infinite}
+@keyframes cdp{50%{box-shadow:0 0 0 6px rgba(255,214,0,.5)}}
+.cdt{font-size:38px;font-weight:700;font-family:'Barlow Condensed',Arial,sans-serif;letter-spacing:1px;color:#FFD600;line-height:1.1}
+.cdcard.now .cdt{color:#fff}
+.cdx{position:absolute;top:4px;right:6px;background:transparent;border:0;color:#fff;font-size:24px;min-height:0;padding:2px 10px}
+.cdcard small{display:block;opacity:.88}
+</style>
+</head>
+<body>
+<div id="loginScreen" class="auth">
+  <div class="auth-card">
+    <h1><span class="ball">🏏</span> Cricket Match Manager</h1>
+    <p>Sign in to your match database</p>
+    <form id="loginForm">
+      <input id="email" type="text" placeholder="Username or email" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+      <input id="password" type="password" placeholder="Password" required>
+      <button class="primary" type="submit">Login</button>
+    </form>
+    <button id="signupBtn" class="link-btn">Create account</button>
+    <p id="authMsg"></p>
+    <p class="rem-note">Use a username (3-20 letters or numbers only) or an email address. Password: minimum 6 characters. New accounts must be approved by an admin before they can see any matches.</p>
+  </div>
+</div>
+
+<div id="pendingScreen" class="auth hidden"><div class="auth-card">
+  <h1>Waiting for approval</h1><p id="pendEmail"></p>
+  <p>Your account is created. An admin must approve it and give you permissions before you can see matches.</p>
+  <div class="actions"><button id="pendRefresh" class="primary">Check again</button><button id="pendLogout">Logout</button></div>
+</div></div>
+
+<div id="app" class="container hidden">
+<header>
+  <div>
+    <h1><span class="ball">🏏</span> Cricket Match Manager</h1>
+    <p>Online match database</p>
+  </div>
+  <div class="userbar"><span id="roleBadge" class="pill done hidden"></span><span id="userEmail"></span><button id="installBtn" class="hidden">⬇ Install app</button><button id="logoutBtn">Logout</button></div>
+</header>
+<nav id="mainNav" class="mainnav"></nav>
+<div id="offlineBar" class="notice off hidden">Offline - showing the last synced data (view only). It will refresh when you are back online.</div>
+<div id="rolesBar" class="notice warn hidden">Admin / user roles are not enabled yet: run add_roles.sql in Supabase SQL Editor. Until then everyone signed in has full access to their own data.</div>
+<div id="pendBar" class="notice warn hidden" style="cursor:pointer"></div>
+<div id="extraBar" class="notice warn hidden">Checklist and upload link need one-time setup: run add_v21_columns.sql in Supabase SQL Editor.</div>
+<div id="camBar" class="notice warn hidden">Camera option needs one-time setup: run add_camera_column.sql in Supabase SQL Editor.</div>
+<div id="v24Bar" class="notice warn hidden">Operators, live-stream platforms and the new admin tools need one-time setup: run add_v24_core.sql in Supabase SQL Editor.</div>
+<div id="statusBar" class="notice warn hidden">Status workflow needs one-time setup: run add_status_column.sql in Supabase SQL Editor. Until then only Scheduled / Recording / Recorded / Editing / Uploaded work.</div>
+
+<section class="card" data-page="home">
+<h2>Recording Dashboard</h2>
+<div class="kpi-grid">
+ <div class="kpi"><strong id="kTotal">0</strong><span>Total matches</span></div>
+ <div class="kpi"><strong id="kRecorded">0</strong><span>Recorded</span></div>
+ <div class="kpi"><strong id="kRecordPending">0</strong><span>Recording pending</span></div>
+ <div class="kpi"><strong id="kUploaded">0</strong><span>Uploaded</span></div>
+ <div class="kpi"><strong id="kUploadPending">0</strong><span>Upload pending</span></div>
+</div>
+</section>
+
+<section class="card" data-page="alerts">
+<h2>Needs Attention &amp; Reminders</h2>
+<div id="attentionList"></div>
+<p id="attentionEmpty" class="empty hidden">All clear - nothing needs attention right now.</p>
+<div class="grid" style="margin-top:12px">
+ <label>Match alarm before start<select id="remLead"><option value="15" selected>15 minutes (recommended)</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="360">6 hours</option></select></label>
+ <label class="inline-check" style="align-self:end"><input type="checkbox" id="remOverdue" checked> Daily pending summary</label>
+ <div class="actions" style="margin:0;align-items:end"><button id="remEnableBtn" class="primary">Enable reminders</button><button id="remTestBtn">Test</button></div>
+</div>
+<div class="grid" style="margin-top:10px"><label>Upload target (hours after match ends)<select id="dueHrs"><option>12</option><option selected>24</option><option>48</option><option>72</option></select></label><label class="inline-check" style="align-self:end"><input type="checkbox" id="remMine"> Reminders only for my matches</label></div>
+<div class="grid" style="margin-top:10px"><label class="inline-check" style="align-self:end"><input type="checkbox" id="cdOn" checked> Show live countdown popup (hh:mm:ss)</label><label>Popup starts<select id="cdWin"><option value="15">15 min before</option><option value="30">30 min before</option><option value="60" selected>1 hour before</option><option value="120">2 hours before</option><option value="360">6 hours before</option></select></label></div>
+<p id="remMsg" class="rem-note"></p>
+<p class="rem-note"><strong>15-minute match alarm:</strong> tap Enable reminders and allow notifications. The alert checks while this app is open or installed and running on this device. Browser/phone background restrictions may delay it; reliable alerts while fully closed require server push notifications.</p>
+</section>
+
+<section class="card" id="secPlan" data-page="planner"><h2>Camera Planner</h2>
+<div class="actions" style="margin:0 0 10px"><button id="planPrev">&larr;</button><input type="date" id="planDate" style="width:auto"><button id="planNext">&rarr;</button><button id="planSuggest" class="primary">Suggest cameras</button></div>
+<div style="overflow-x:auto"><div id="planBox" style="min-width:860px"></div></div><div id="planOut"></div></section>
+
+<section class="card" id="secStats" data-page="stats"><h2>Analytics</h2><div id="statsBox" class="statsgrid"></div></section>
+
+<section class="card" data-page="calendar">
+<h2>Match Calendar & Countdown</h2>
+<div class="grid">
+ <label>Show calendar<select id="calendarRange"><option value="7">Next 7 days</option><option value="30" selected>Next 30 days</option><option value="all">All upcoming</option></select></label>
+</div>
+<div id="calendarList" class="calendar-list" style="margin-top:12px"></div>
+<p id="calendarMsg" class="status-msg"></p>
+</section>
+
+<section class="card" id="secAuto" data-page="fetch">
+<h2>Auto fetch: enter a series name to load all its matches</h2>
+<div class="grid">
+<label class="wide">Series name<input id="afSeries" placeholder="e.g. Nepal Premier League 2026"></label>
+<label>Time Zone<select id="afTZ"><option value="local">This device's local time</option><option value="utc">GMT / UTC</option><option value="ist">India (IST)</option></select></label>
+<label class="wide">CricAPI key (saved on this device)<input id="afKey" type="password" placeholder="Free key from cricketdata.org"></label>
+</div>
+<div id="afPick" class="hidden" style="margin-top:12px"><label>Select the series<select id="afSelect"></select></label></div>
+<div class="actions">
+<button type="button" id="afSearchBtn" class="primary">Search series</button>
+<button type="button" id="afGetBtn" class="hidden">Fetch matches</button>
+<button type="button" id="afSaveBtn" class="primary hidden">Save all to app</button>
+</div>
+<p id="afMsg" style="color:#667085;white-space:pre-line"></p>
+<div class="table-wrap hidden" id="afPrevWrap"><table style="min-width:600px"><thead><tr><th>Date</th><th>Time</th><th>Match</th><th>Type</th></tr></thead><tbody id="afPrev"></tbody></table></div>
+</section>
+
+<section class="card" id="secBulk" data-page="bulk">
+<h2>Bulk add: many matches in one series</h2>
+<div class="grid">
+<label>Format<input id="bFormat" value="Cricket"></label>
+<label class="wide">Series<input id="bSeries" placeholder="Series name"></label>
+<label>ODI / T20<select id="bOdiT20"><option value="">Select</option><option>ODI</option><option>T20</option></select></label>
+<label>Expected Overs<input id="bExpected" readonly></label>
+<label>Recorded<select id="bRecorded"><option>Pending</option><option>Done</option></select></label>
+<label>Uploaded<select id="bUploaded"><option>Pending</option><option>Done</option></select></label>
+<label class="wide">Recording Remarks (applies to every match, optional)<textarea id="bRemarks" class="remarks-input" rows="2"></textarea></label>
+</div>
+<div id="dateGroups"></div>
+<div class="actions">
+<button type="button" id="addDateBtn">+ Add Date</button>
+<button type="button" id="bulkSaveBtn" class="primary">Save all matches</button>
+</div>
+</section>
+
+<section class="card" id="secEntry" data-page="add">
+<h2>Match Entry (single / edit)</h2>
+<form id="matchForm">
+<div class="grid">
+<label>Format<input id="format" value="Cricket" required></label>
+<label>Date (dd-mm-yyyy)<input id="date" type="text" inputmode="numeric" placeholder="dd-mm-yyyy" maxlength="10" required></label>
+<label>Time (AM/PM)<div id="timeBox"></div></label>
+<label>Series<input id="series" placeholder="Series name" required></label>
+<label class="wide">Match<input id="match" placeholder="Team A vs Team B" required></label>
+<label>ODI / T20<select id="odiT20" required><option value="">Select</option><option>ODI</option><option>T20</option></select></label>
+<label>Expected Overs<input id="expected" type="number" readonly></label>
+<label>Status<select id="status"><option>Scheduled</option><option>Recording</option><option>Recorded</option><option>Editing</option><option>Uploaded</option><option>Postponed</option><option>Abandoned</option><option>Cancelled</option></select></label>
+<label>Camera<select id="camera"></select></label>
+<label>Recorded<select id="recorded"><option>Pending</option><option>Done</option></select></label>
+<label>Uploaded<select id="uploaded"><option>Pending</option><option>Done</option></select></label>
+<label class="wide">Recording Remarks<textarea id="remarks" class="remarks-input" rows="3" placeholder="Enter recording remarks..."></textarea></label>
+</div>
+<div class="actions">
+<button class="primary" type="submit" id="submitBtn">Add Match</button>
+<button type="button" id="clearBtn">Clear</button>
+</div>
+</form>
+</section>
+
+<section class="card" data-page="matches">
+<div class="toolbar">
+<div><h2>All Matches <span id="count" class="badge">0</span></h2><input id="search" class="search" placeholder="Search..."><select id="cameraFilter" class="search" style="margin-top:8px"></select><select id="operatorFilter" class="search" style="margin-top:8px"></select><select id="streamFilter" class="search" style="margin-top:8px"></select><select id="statusFilter" class="search" style="margin-top:8px"><option value="">All statuses</option><option>Scheduled</option><option>Recording</option><option>Recorded</option><option>Editing</option><option>Uploaded</option><option>Postponed</option><option>Abandoned</option><option>Cancelled</option></select></div>
+<div class="actions"><button id="importBtn">Import Excel</button><button id="backupBtn">Backup JSON</button><button id="restoreBtn">Restore JSON</button><button id="clearAllBtn" class="danger">Delete All</button><input id="fileInput" type="file" accept=".xlsx,.xls" hidden><input id="backupInput" type="file" accept=".json,application/json" hidden></div>
+</div>
+<div class="grid" id="reportBox" style="margin:12px 0">
+<label>Report from<input type="date" id="reportFrom"></label><label>Report to<input type="date" id="reportTo"></label><div class="actions" style="align-items:end"><button id="rangeExcelBtn" class="primary">Download date-range Excel</button></div>
+</div>
+<div id="bulkBar" class="bulkbar hidden"><strong id="selCount"></strong>
+ <select id="bulkStatus"><option>Scheduled</option><option>Recording</option><option>Recorded</option><option>Editing</option><option>Uploaded</option><option>Postponed</option><option>Abandoned</option><option>Cancelled</option></select><button id="bulkStatusBtn">Set status</button>
+ <select id="bulkCamera"></select><button id="bulkCameraBtn">Set camera</button>
+ <input id="bulkShift" type="number" value="1" title="Days (negative = earlier)" style="width:70px"><button id="bulkShiftBtn">Shift days</button>
+ <button id="bulkDelBtn" class="danger">Delete</button><button id="bulkClearBtn">Clear</button></div>
+<div id="monthDownloadButtons" class="month-downloads"></div>
+<div class="table-wrap">
+<table><thead><tr><th><input type="checkbox" id="selAll" class="rowchk" title="Select all shown"></th><th>Date</th><th>Time</th><th>Series</th><th>Match</th><th>ODI/T20</th><th>Expected</th><th>Recorded</th><th>Uploaded</th><th>Camera</th><th>Operator</th><th>Live on</th><th>Status</th><th>Checklist</th><th>Remarks</th><th>Action</th></tr></thead>
+<tbody id="matchTable"></tbody></table>
+</div>
+<p id="empty" class="empty">No matches found.</p>
+</section>
+
+<section class="card hidden" id="secAdmin" data-page="users">
+<h2>Admin: Users &amp; Permissions <span id="pendBadge" class="badge hidden"></span></h2>
+<p class="rem-note" style="margin-top:0">Approve new accounts, choose a role and tick what each user may do. Un-approving blocks a user. Admins always have full access.</p>
+<div class="actions" style="margin:0 0 12px"><button id="usersRefresh">Refresh users</button></div>
+<div id="usersList"></div>
+</section>
+
+<section class="card hidden" id="secAdmin2" data-page="tools"><h2>Admin tools</h2><div id="adm2"></div></section>
+<footer>Online data is stored in Supabase with per-user access rules. | Version 27</footer>
+<div id="cdPop" class="cdpop hidden"></div>
+<div id="toast" class="toast hidden"><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
+<div id="ckModal" class="modal hidden"><div class="box">
+ <h3 id="ckTitle"></h3><p style="margin:0 0 8px;color:var(--muted);font-size:14px">Checklist and upload link</p>
+ <label class="ck-row"><input type="checkbox" id="ck_rec">Recorded</label>
+ <label class="ck-row"><input type="checkbox" id="ck_trim">Trimmed / edited</label>
+ <label class="ck-row"><input type="checkbox" id="ck_thumb">Thumbnail ready</label>
+ <label class="ck-row"><input type="checkbox" id="ck_title">Title &amp; description</label>
+ <label class="ck-row"><input type="checkbox" id="ck_upl">Uploaded &amp; checked</label>
+ <div style="margin-top:12px;font-weight:700">Live stream platforms</div>
+ <div id="strBox" class="strg" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0"></div>
+ <label>Live stream link<input id="strLink" type="url" placeholder="https://..."></label>
+ <div class="actions" style="margin:8px 0 0"><button type="button" id="genTitleBtn">Generate title &amp; description</button></div>
+ <textarea id="genOut" class="hidden" rows="6" readonly style="margin-top:8px"></textarea>
+ <label style="margin-top:12px">Upload link (YouTube etc.)<input id="ckLink" type="url" placeholder="https://..."></label>
+ <div class="actions"><button id="ckSave" class="primary">Save</button><button id="ckCancel">Cancel</button></div>
+</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script>if(typeof XLSX==="undefined"){document.write('<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"><\/script>');}</script>
+<script>
+const SUPABASE_URL = "https://oevqwgnjhobexmdqiyfg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_9zhVGKfBiAOSVCP-qLs2vA_ZOuIvD9R";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let allMatches=[], editingId=null;
+
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+
+/* ---------- Date / Time helpers (dd-mm-yyyy, 12-hour AM/PM) ---------- */
+function fmtDate(iso){ if(!iso) return ""; const [y,m,d]=String(iso).slice(0,10).split("-"); return `${d}-${m}-${y}`; }
+function fmtTime(t){ if(!t) return ""; let [h,m]=String(t).split(":").map(Number); const ap=h>=12?"PM":"AM"; h=h%12||12; return `${pad(h)}:${pad(m)} ${ap}`; }
+function parseDMY(s){
+  s=String(s||"").trim().replace(/[\/.]/g,"-");
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return s;
+  m=s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/); if(!m) return null;
+  const d=+m[1],mo=+m[2],y=+m[3], dt=new Date(Date.UTC(y,mo-1,d));
+  if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d) return null;
+  return `${y}-${pad(mo)}-${pad(d)}`;
+}
+function todayDMY(){const n=new Date();return `${pad(n.getDate())}-${pad(n.getMonth()+1)}-${n.getFullYear()}`;}
+function autoDash(el){
+  el.addEventListener("input",()=>{
+    let v=el.value.replace(/\D/g,"").slice(0,8);
+    if(v.length>4) v=v.slice(0,2)+"-"+v.slice(2,4)+"-"+v.slice(4);
+    else if(v.length>2) v=v.slice(0,2)+"-"+v.slice(2);
+    el.value=v;
+  });
+}
+function makeTimePicker(t){
+  const w=document.createElement("span"); w.className="timebox";
+  w.innerHTML=`<select class="th">${[...Array(12)].map((_,i)=>`<option>${pad(i+1)}</option>`).join("")}</select>`+
+    `<select class="tm">${[...Array(60)].map((_,i)=>`<option>${pad(i)}</option>`).join("")}</select>`+
+    `<select class="tp"><option>AM</option><option>PM</option></select>`;
+  setTP(w,t||"09:00"); return w;
+}
+function setTP(w,t){
+  let [h,m]=(t||"09:00").split(":").map(Number); const ap=h>=12?"PM":"AM"; h=h%12||12;
+  w.querySelector(".th").value=pad(h); w.querySelector(".tm").value=pad(m||0); w.querySelector(".tp").value=ap;
+}
+function getTP(w){
+  let h=(+w.querySelector(".th").value)%12; if(w.querySelector(".tp").value==="PM") h+=12;
+  return `${pad(h)}:${w.querySelector(".tm").value}:00`;
+}
+function overs(type){return type==="ODI"?100:type==="T20"?40:null;}
+function matchKey(r){return [r.match_date,String(r.match_time||"").slice(0,5),String(r.series||"").trim().toLowerCase().replace(/\s+/g," "),String(r.match||"").trim().toLowerCase().replace(/\s+/g," ")].join("|");}
+
+/* ---------- Auth ---------- */
+async function init(){
+  const {data:{session}}=await client.auth.getSession();
+  setAuthUI(session);
+}
+function setAuthUI_base(session){
+  $("loginScreen").classList.toggle("hidden",!!session);
+  $("app").classList.toggle("hidden",!session);
+  if(session){$("userEmail").textContent=session.user.email||"";resetForm();resetBulk();render();}
+}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const em=toLoginEmail($("email").value); if(!em){$("authMsg").textContent="Username: 3-20 letters or numbers only (no spaces, dots or symbols), or a full email address.";return;}
+ $("authMsg").textContent="Logging in...";
+ const {error}=await client.auth.signInWithPassword({email:em,password:$("password").value});
+ $("authMsg").textContent=error?(/invalid login/i.test(error.message)?"Wrong username/email or password.":/valid|format/i.test(error.message)?`Supabase rejected "${em}" as an invalid address (${error.message}).`:error.message):"";
+});
+$("signupBtn").addEventListener("click",async()=>{
+ const email=toLoginEmail($("email").value), password=$("password").value;
+ if(!email){$("authMsg").textContent="Username: 3-20 letters or numbers only (no spaces, dots or symbols), or a full email address.";return;}
+ if(password.length<6){$("authMsg").textContent="Password must be at least 6 characters.";return;}
+ $("authMsg").textContent="Creating account...";
+ const {data,error}=await client.auth.signUp({email,password});
+ if(error){$("authMsg").textContent=/valid|format|invalid/i.test(error.message)?`Supabase rejected "${email}" as an invalid address (${error.message}). Try a simple username like raju123 or a real email. If usernames keep failing, the admin should change USERNAME_DOMAIN in index.html.`:error.message;return;}
+ $("authMsg").textContent=(data&&data.session)?"Account created. An admin must approve it before you can see matches.":"Account created, but Supabase is still waiting for email confirmation. Admin: turn OFF \"Confirm email\" in Supabase > Authentication > Sign In / Providers > Email, then try logging in.";
+});
+$("logoutBtn").addEventListener("click",()=>client.auth.signOut());
+client.auth.onAuthStateChange((_event,session)=>setAuthUI(session));
+
+/* ---------- Single entry / edit ---------- */
+const timePicker=makeTimePicker("09:00"); $("timeBox").appendChild(timePicker);
+autoDash($("date"));
+$("odiT20").addEventListener("change",()=>{ $("expected").value=overs($("odiT20").value)??""; });
+$("matchForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(editingId?!can("edit"):!can("add")){alert("You do not have permission to "+(editingId?"edit":"add")+" matches.");return;}
+ const d=parseDMY($("date").value);
+ if(!d){alert("Enter the date as dd-mm-yyyy (for example 15-09-2026).");return;}
+ const row={format:$("format").value.trim(),match_date:d,match_time:getTP(timePicker),series:$("series").value.trim(),match:$("match").value.trim(),odi_t20:$("odiT20").value,expected_overs:Number($("expected").value)||null,recorded:$("recorded").value,uploaded:$("uploaded").value,recording_remarks:$("remarks").value.trim()};
+ const stSel=$("status").value; if(hasStatus!==false&&stSel) row.status=stSel;
+ if(hasCam!==false) row.camera=$("camera").value;
+  const duplicate=allMatches.find(r=>r.id!==editingId&&matchKey(r)===matchKey(row));
+  if(duplicate){alert("Possible duplicate found: "+duplicate.series+" | "+duplicate.match+" | "+fmtDate(duplicate.match_date)+". Please check before saving.");return;}
+  {const cl=INACTIVE.includes($("status").value)?[]:clashesWith(row,editingId); if(cl.length&&!confirm("⚠ Time overlap with: "+cl.slice(0,3).map(o=>o.match+" ("+fmtTime(o.match_time)+")"+($("camera").value&&o.camera===$("camera").value?" - SAME CAMERA":"")).join(", ")+"\n\nSave anyway?"))return;}
+  let result;
+  if(editingId){
+    const old=allMatches.find(r=>r.id===editingId);
+    if(old&&(old.match_date!==row.match_date||String(old.match_time||"").slice(0,5)!==String(row.match_time||"").slice(0,5))){
+      const hist={match_id:old.id,old_date:old.match_date,old_time:old.match_time,new_date:row.match_date,new_time:row.match_time,series:old.series,match_name:old.match,changed_at:new Date().toISOString()};
+      const h=await client.from("match_reschedule_history").insert(hist);
+      if(h.error){alert("Reschedule history table is not ready. Run setup_reschedule_history.sql in Supabase first. Details: "+h.error.message);return;}
+    }
+    result=await client.from("matches").update(row).eq("id",editingId).select("id");
+    if(!result.error&&!(result.data&&result.data.length)){alert("Not allowed: you do not have permission to edit this match.");return;}
+  } else result=await client.from("matches").insert(row);
+ if(result.error){alert(result.error.message);return;}
+ const wasEdit=!!editingId; resetForm(); await render(); if(wasEdit)showPage("matches");
+});
+function resetForm(){editingId=null;$("matchForm").reset();$("expected").value="";$("submitBtn").textContent="Add Match";$("date").value=todayDMY();setTP(timePicker,"09:00");}
+
+/* ---------- Bulk add: ek series, date-wise multiple match lines ---------- */
+$("bOdiT20").addEventListener("change",()=>{ $("bExpected").value=overs($("bOdiT20").value)??""; });
+function addLine(group,time,text){
+  const line=document.createElement("div"); line.className="mline";
+  const tp=makeTimePicker(time); line.appendChild(tp);
+  const inp=document.createElement("input"); inp.className="m-text"; inp.placeholder="Team A vs Team B"; inp.value=text||""; line.appendChild(inp);
+  const rm=document.createElement("button"); rm.type="button"; rm.className="small-btn rm"; rm.textContent="✕";
+  rm.onclick=()=>{ if(group.querySelectorAll(".mline").length>1) line.remove(); else inp.value=""; };
+  line.appendChild(rm);
+  group.querySelector(".lines").appendChild(line);
+  return inp;
+}
+function addDateGroup(dateStr){
+  const g=document.createElement("div"); g.className="dgroup";
+  g.innerHTML=`<div class="dgroup-head"><label>Date (dd-mm-yyyy)<input class="g-date" inputmode="numeric" placeholder="dd-mm-yyyy" maxlength="10"></label>
+   <button type="button" class="small-btn add-line">+ Match line</button>
+   <button type="button" class="small-btn rm rm-date">Remove date</button></div><div class="lines"></div>`;
+  const di=g.querySelector(".g-date"); di.value=dateStr||""; autoDash(di);
+  g.querySelector(".add-line").onclick=()=>{
+    const last=g.querySelector(".mline:last-child .timebox");
+    addLine(g,last?getTP(last).slice(0,5):"09:00","").focus();
+  };
+  g.querySelector(".rm-date").onclick=()=>{ if(document.querySelectorAll(".dgroup").length>1) g.remove(); else resetBulkGroups(); };
+  $("dateGroups").appendChild(g);
+  addLine(g,"09:00","");
+  return g;
+}
+function resetBulkGroups(){ $("dateGroups").innerHTML=""; addDateGroup(""); }
+function resetBulk(){ $("bExpected").value=overs($("bOdiT20").value)??""; if(!document.querySelector(".dgroup")) addDateGroup(""); }
+$("addDateBtn").addEventListener("click",()=>{ const g=addDateGroup(""); g.querySelector(".g-date").focus(); });
+$("bulkSaveBtn").addEventListener("click",async()=>{
+  const series=$("bSeries").value.trim(), type=$("bOdiT20").value;
+  if(!series){alert("Enter a series name.");return;}
+  if(!type){alert("Select ODI or T20.");return;}
+  const rows=[];
+  for(const g of document.querySelectorAll(".dgroup")){
+    const raw=g.querySelector(".g-date").value.trim();
+    const lines=[...g.querySelectorAll(".mline")].filter(l=>l.querySelector(".m-text").value.trim());
+    if(!raw && !lines.length) continue;
+    const d=parseDMY(raw);
+    if(!d){alert("Invalid date: '"+raw+"'. Use dd-mm-yyyy.");return;}
+    for(const l of lines){
+      rows.push({format:$("bFormat").value.trim()||"Cricket",match_date:d,match_time:getTP(l.querySelector(".timebox")),series,match:l.querySelector(".m-text").value.trim(),odi_t20:type,expected_overs:overs(type),recorded:$("bRecorded").value,uploaded:$("bUploaded").value,recording_remarks:$("bRemarks").value.trim()});
+    }
+  }
+  if(!rows.length){alert("Add at least one match.");return;}
+  const seen=new Set(allMatches.map(matchKey)); const unique=[]; let dup=0;
+  for(const r of rows){const k=matchKey(r);if(seen.has(k)){dup++;continue;}seen.add(k);unique.push(r);}
+  if(!unique.length){alert("All "+dup+" match(es) look like duplicates. Nothing was saved.");return;}
+  if(dup&&!confirm(dup+" possible duplicate(s) will be skipped. Save the remaining "+unique.length+" match(es)?"))return;
+  {let cn=0;const tmp=unique.map(r=>({...r,id:"new"+Math.random()}));const pool=allMatches.filter(o=>!INACTIVE.includes(effStatus(o)));
+   for(let i=0;i<tmp.length;i++){const a=tmp[i];if(pool.some(o=>startOf(o)<endOf(a)&&startOf(a)<endOf(o))||tmp.some((b,j)=>j!==i&&startOf(b)<endOf(a)&&startOf(a)<endOf(b)))cn++;}
+   if(cn&&!confirm(cn+" of these match(es) overlap in time with other matches. Save anyway?"))return;}
+  $("bulkSaveBtn").disabled=true;
+  const {error}=await client.from("matches").insert(unique);
+  $("bulkSaveBtn").disabled=false;
+  if(error){alert(error.message);return;}
+  alert(unique.length+" match(es) added. "+dup+" duplicate(s) skipped.");
+  resetBulkGroups(); $("bRemarks").value=""; await render();
+});
+
+/* ---------- Same date+time wali rows sheet ke order me rahein (seq column ho to) ---------- */
+async function fetchOrdered(){
+  let q=await client.from("matches").select("*").order("match_date",{ascending:true}).order("match_time",{ascending:true}).order("seq",{ascending:true});
+  if(q.error) q=await client.from("matches").select("*").order("match_date",{ascending:true}).order("match_time",{ascending:true});
+  return q;
+}
+
+/* ---------- Table ---------- */
+async function render(){
+ let data,error;
+ try{({data,error}=await fetchOrdered());}catch(e){error=e;}
+ if(error){
+  const c=(!navigator.onLine||/fetch|network|load failed/i.test(String(error.message||error)))?loadCache():null;
+  if(c){data=c;setOffline(true);}else{alert(error.message||error);return;}
+ } else {setOffline(false);saveCache(data);}
+ allMatches=data||[];
+ if(!offlineMode){ if(allMatches.length){hasStatus=('status' in allMatches[0]);hasExtra=('checklist' in allMatches[0]);hasCam=('camera' in allMatches[0]);hasV24=('operator' in allMatches[0]);} else {const pr=await client.from("matches").select("status").limit(1); hasStatus=!pr.error; const pe=await client.from("matches").select("checklist,video_link").limit(1); hasExtra=!pe.error; const pc=await client.from("matches").select("camera").limit(1); hasCam=!pc.error; const p4=await client.from("matches").select("operator,stream_platforms,stream_link").limit(1); hasV24=!p4.error;} $("statusBar").classList.toggle("hidden",hasStatus!==false); $("extraBar").classList.toggle("hidden",hasExtra!==false); $("camBar").classList.toggle("hidden",hasCam!==false); $("v24Bar").classList.toggle("hidden",hasV24!==false); }
+ updateDashboard(allMatches); renderCalendar(allMatches); renderAttention(allMatches); renderPlan(); renderStats(allMatches); checkReminders();
+ const q=$("search").value.toLowerCase().trim();
+ const sf=$("statusFilter").value, cf=$("cameraFilter").value, opf=$("operatorFilter").value, pf=$("streamFilter").value; const rows=allMatches.filter(r=>(!sf||effStatus(r)===sf)&&(!cf||(cf==="__none"?!r.camera:r.camera===cf))&&(!opf||(opf==="__me"?isMine(r):opf==="__none"?!r.operator:r.operator===opf))&&(!pf||String(r.stream_platforms||"").split(", ").includes(pf))&&(!q||[...Object.values(r),fmtDate(r.match_date),fmtTime(r.match_time)].some(v=>String(v??"").toLowerCase().includes(q))));
+ $("count").textContent=allMatches.length;$("empty").style.display=rows.length?"none":"block";
+ renderMonthDownloadButtons(allMatches);
+ const pill=v=>`<span class="pill ${v==="Done"?"done":"pending"}">${esc(v)}</span>`;
+ $("matchTable").innerHTML=rows.map(r=>`<tr><td><input type="checkbox" class="rowchk" data-id="${r.id}"${sel.has(r.id)?" checked":""}></td><td data-label="Date">${esc(fmtDate(r.match_date))}</td><td data-label="Time">${esc(fmtTime(r.match_time))}</td><td data-label="Series">${esc(r.series)}</td><td data-label="Match">${esc(r.match)}${clashSet.has(r.id)?' <span title="Overlaps another match" style="color:var(--leather)">⚠</span>':""}${overdueSet.has(r.id)?' <span title="Upload overdue">⏰</span>':""}</td><td data-label="ODI/T20">${esc(r.odi_t20)}</td><td data-label="Expected">${esc(r.expected_overs)}</td><td data-label="Recorded">${pill(r.recorded)}</td><td data-label="Uploaded">${pill(r.uploaded)}</td><td data-label="Camera">${camCell(r)}</td><td data-label="Operator">${opCell(r)}</td><td data-label="Live on">${streamCell(r)}</td><td data-label="Status">${statusCell(r)}</td><td data-label="Checklist">${ckCell(r)}</td><td class="remarks-cell" data-label="Remarks">${esc(r.recording_remarks)}</td><td>${can("edit")?`<button class="small-btn edit" onclick="editMatch('${r.id}')">Edit</button> `:""}<button class="small-btn" onclick="showRescheduleHistory('${r.id}')">History</button>${can("delete")?` <button class="small-btn delete" onclick="deleteMatch('${r.id}')">Delete</button>`:""}</td></tr>`).join("");
+ updateBulkBar();
+}
+window.editMatch=async id=>{
+ const r=allMatches.find(x=>x.id===id);if(!r)return;editingId=id;
+ $("format").value=r.format||"Cricket";$("date").value=fmtDate(r.match_date);setTP(timePicker,(r.match_time||"09:00").slice(0,5));$("series").value=r.series||"";$("match").value=r.match||"";$("odiT20").value=r.odi_t20||"";$("expected").value=r.expected_overs||"";$("recorded").value=r.recorded||"Pending";$("uploaded").value=r.uploaded||"Pending";$("remarks").value=r.recording_remarks||"";$("status").value=effStatus(r);$("camera").value=r.camera||"";$("submitBtn").textContent="Update Match";
+ showPage("add");$("matchForm").scrollIntoView({behavior:"smooth"});
+};
+window.deleteMatch=async id=>{if(confirm("Delete this match?")){const {error}=await client.from("matches").delete().eq("id",id);if(error)alert(error.message);else render();}};
+$("clearBtn").addEventListener("click",resetForm);$("search").addEventListener("input",render);$("statusFilter").addEventListener("change",render);$("cameraFilter").addEventListener("change",render);$("operatorFilter").addEventListener("change",render);$("streamFilter").addEventListener("change",render);
+$("clearAllBtn").addEventListener("click",async()=>{if(!confirm("Delete ALL your matches?"))return;await deleteRows(allMatches.slice(),"All matches deleted");});
+
+/* ---------- Month-wise Excel download buttons ---------- */
+const MONTH_NAMES=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function monthKey(dateStr){
+  const m=String(dateStr||"").match(/^(\d{4})-(\d{2})-/);
+  return m?`${m[1]}-${m[2]}`:"";
+}
+function monthLabel(key){
+  const [y,m]=key.split("-").map(Number);
+  return `${MONTH_NAMES[m-1]} ${y}`;
+}
+function renderMonthDownloadButtons(rows){
+  const keys=[...new Set((rows||[]).map(r=>monthKey(r.match_date)).filter(Boolean))].sort();
+  const box=$("monthDownloadButtons");
+  box.innerHTML=keys.map(k=>`<button type="button" class="month-download-btn" data-month="${k}">⬇ ${esc(monthLabel(k))} Excel</button>`).join("");
+  box.querySelectorAll("[data-month]").forEach(btn=>btn.addEventListener("click",()=>downloadMonthExcel(btn.dataset.month)));
+}
+
+function makeExcelWorkbook(rows,key){
+  const blk={style:"thin",color:{rgb:"000000"}}, yel={style:"medium",color:{rgb:"FFD600"}};
+  const border={top:blk,bottom:blk,left:blk,right:blk};
+  const hdrStyle={font:{name:"Arial",sz:13,bold:true},fill:{patternType:"solid",fgColor:{rgb:"FFC000"}},border,alignment:{horizontal:"center",vertical:"center"}};
+  const base={font:{name:"Arial",sz:12},alignment:{horizontal:"center",vertical:"center"}};
+  const left={...base,alignment:{horizontal:"left",vertical:"center"}};
+  const remStyle={...left};
+  const heads=["Date","Time","Series","Match","ODI/T20","Expected Overs","Recorded","Uploaded","Recording Remarks","Status","Upload Link","Camera","Operator","Live Platforms","Stream Link"];
+  const aoa=[heads.map(h=>({v:h,t:"s",s:hdrStyle}))];
+  for(const r of rows){
+    const serial=r.match_date?Math.round((Date.UTC(...r.match_date.split("-").map((x,i)=>i===1?+x-1:+x))-Date.UTC(1899,11,30))/86400000):"";
+    aoa.push([
+      serial===""?{v:"",t:"s",s:base}:{v:serial,t:"n",z:"dd-mm-yyyy",s:base},
+      r.match_time?{v:(()=>{const [hh,mm,ss]=String(r.match_time).split(":").map(Number);return ((hh*3600)+(mm*60)+(ss||0))/86400;})(),t:"n",z:"h:mm AM/PM",s:base}:{v:"",t:"s",s:base},
+      {v:r.series||"",t:"s",s:left},{v:r.match||"",t:"s",s:left},
+      {v:r.odi_t20||"",t:"s",s:left},
+      r.expected_overs?{v:r.expected_overs,t:"n",s:left}:{v:"",t:"s",s:left},
+      {v:r.recorded||"",t:"s",s:base},{v:r.uploaded||"",t:"s",s:base},
+      {v:r.recording_remarks||"",t:"s",s:remStyle},{v:effStatus(r),t:"s",s:base},{v:r.video_link||"",t:"s",s:left},{v:r.camera||"",t:"s",s:base},{v:dispName(r.operator),t:"s",s:base},{v:r.stream_platforms||"",t:"s",s:base},{v:r.stream_link||"",t:"s",s:left}
+    ]);
+  }
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"]=[12.57,10.43,39.57,65.29,36.14,38.43,20.71,22.43,25.14,16,40,14,18,26,40].map(w=>({wch:w}));
+  ws["!rows"]=[{hpt:24}];
+  const [year,month]=key.split("-").map(Number);
+  const sheetName=`${MONTH_NAMES[month-1].slice(0,3)}${year}`;
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,sheetName);
+  return wb;
+}
+
+async function downloadMonthExcel(key){
+  if(typeof XLSX==="undefined"){alert("Excel library failed to load. Check your internet connection and refresh the page.");return;}
+  const rows=(allMatches||[]).filter(r=>monthKey(r.match_date)===key)
+    .sort((a,b)=>String(a.match_date).localeCompare(String(b.match_date))||String(a.match_time||"99").localeCompare(String(b.match_time||"99"))||Number(a.seq||0)-Number(b.seq||0));
+  if(!rows.length){alert("No matches found for "+monthLabel(key)+".");return;}
+  const wb=makeExcelWorkbook(rows,key);
+  const [year,month]=key.split("-").map(Number);
+  const fname=`Cricket_Matches_${MONTH_NAMES[month-1]}_${year}.xlsx`;
+  const arr=XLSX.write(wb,{bookType:"xlsx",type:"array"});
+  const blob=new Blob([arr],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const url=URL.createObjectURL(blob), link=document.createElement("a");
+  link.href=url; link.download=fname; document.body.appendChild(link); link.click();
+  setTimeout(()=>{link.remove();URL.revokeObjectURL(url);},5000);
+}
+
+/* ---------- Dashboard / Calendar / Backup / Report / Reschedule history ---------- */
+function updateDashboard(rows){
+ rows=rows.filter(r=>!INACTIVE.includes(effStatus(r)));
+ const n=(fn)=>rows.filter(fn).length;
+ $("kTotal").textContent=rows.length;
+ $("kRecorded").textContent=n(r=>r.recorded==="Done");
+ $("kRecordPending").textContent=n(r=>r.recorded!=="Done");
+ $("kUploaded").textContent=n(r=>r.uploaded==="Done");
+ $("kUploadPending").textContent=n(r=>r.uploaded!=="Done");
+}
+function renderCalendar(rows){
+ const now=new Date(), start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const range=$("calendarRange").value;
+ const upcoming=rows.filter(r=>{if(!r.match_date)return false;const dt=new Date(r.match_date+"T"+(r.match_time||"00:00:00"));return dt>=start&&(range==="all"||dt<new Date(start.getTime()+Number(range)*86400000));}).sort((a,b)=>(a.match_date+(a.match_time||"")).localeCompare(b.match_date+(b.match_time||"")));
+ $("calendarList").innerHTML=upcoming.slice(0,100).map(r=>{const dt=new Date(r.match_date+"T"+(r.match_time||"00:00:00"));const mins=Math.max(0,Math.floor((dt-now)/60000));let countdown=dt<now?"Started / time passed":mins>=1440?Math.floor(mins/1440)+"d "+Math.floor(mins%1440/60)+"h left":mins>=60?Math.floor(mins/60)+"h "+mins%60+"m left":mins+"m left";return `<div class="calendar-item"><div class="calendar-date">${esc(fmtDate(r.match_date))}<br><span class="muted">${esc(fmtTime(r.match_time))}</span></div><div><strong>${esc(r.match)}</strong><br><span class="muted">${esc(r.series)} · ${esc(r.odi_t20)}</span></div><div><span class="pill ${r.recorded==="Done"?"done":"pending"}">${esc(r.recorded||"Pending")}</span><br><small>${esc(countdown)}</small></div></div>`}).join("");
+ $("calendarMsg").textContent=upcoming.length?`Showing ${Math.min(upcoming.length,100)} upcoming match(es). Countdown is based on this device's local time.`:"No upcoming matches in this range.";
+}
+$("calendarRange").addEventListener("change",()=>renderCalendar(allMatches));
+setInterval(()=>{if(!$("app").classList.contains("hidden"))renderCalendar(allMatches);},60000);
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},5000);}
+$("backupBtn").addEventListener("click",()=>{const payload={app:"Cricket Match Manager",version:27,exported_at:new Date().toISOString(),matches:allMatches};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Cricket_Match_Backup_${new Date().toISOString().slice(0,10)}.json`);});
+$("restoreBtn").addEventListener("click",()=>$("backupInput").click());
+$("backupInput").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());const rows=Array.isArray(obj)?obj:obj.matches;if(!Array.isArray(rows))throw new Error("Backup file does not contain a matches array.");const seen=new Set(allMatches.map(matchKey)),out=[];let dup=0,bad=0;for(const x of rows){const d=String(x.match_date||"").slice(0,10),type=String(x.odi_t20||"").toUpperCase(),series=String(x.series||"").trim(),match=String(x.match||"").trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!series||!match||!['ODI','T20'].includes(type)){bad++;continue;}const r={format:x.format||"Cricket",match_date:d,match_time:x.match_time||null,series,match,odi_t20:type,expected_overs:overs(type),recorded:x.recorded==="Done"?"Done":"Pending",uploaded:x.uploaded==="Done"?"Done":"Pending",recording_remarks:x.recording_remarks||""};if(hasStatus!==false)r.status=ALL_ST.includes(x.status)?x.status:(r.uploaded==="Done"?"Uploaded":r.recorded==="Done"?"Recorded":"Scheduled");if(hasExtra!==false){r.video_link=safeLink(x.video_link);r.checklist=(x.checklist&&typeof x.checklist==="object")?x.checklist:{};}if(hasCam!==false)r.camera=normCam(x.camera);if(hasV24!==false){r.operator=x.operator||"";r.stream_platforms=normPlats(x.stream_platforms);r.stream_link=safeLink(x.stream_link);}const k=matchKey(r);if(seen.has(k)){dup++;continue;}seen.add(k);out.push(r);}if(!out.length){alert(`Nothing to restore. Duplicates: ${dup}; invalid rows: ${bad}.`);return;}if(!confirm(`Restore ${out.length} match(es)? Duplicates skipped: ${dup}; invalid rows skipped: ${bad}.`))return;let saved=0;for(let i=0;i<out.length;i+=100){const {error}=await client.from("matches").insert(out.slice(i,i+100));if(error)throw error;saved+=Math.min(100,out.length-i);}alert(`Restored ${saved} match(es). Duplicates skipped: ${dup}; invalid rows: ${bad}.`);await render();}catch(err){alert("Restore failed: "+(err.message||err));}e.target.value="";});
+$("rangeExcelBtn").addEventListener("click",()=>{if(typeof XLSX==="undefined"){alert("Excel library did not load. Check internet and refresh.");return;}const from=$("reportFrom").value,to=$("reportTo").value;if(from&&to&&from>to){alert("Report start date must be before end date.");return;}const rows=allMatches.filter(r=>(!from||r.match_date>=from)&&(!to||r.match_date<=to));if(!rows.length){alert("No matches found in the selected date range.");return;}const wb=makeExcelWorkbook(rows,monthKey(rows[0].match_date)||"2026-01");const arr=XLSX.write(wb,{bookType:"xlsx",type:"array"});downloadBlob(new Blob([arr],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Cricket_Matches_${from||"start"}_to_${to||"end"}.xlsx`);});
+async function showRescheduleHistory(id){const {data,error}=await client.from("match_reschedule_history").select("*").eq("match_id",id).order("changed_at",{ascending:false});if(error){alert("Run setup_reschedule_history.sql in Supabase first. "+error.message);return;}if(!data.length){alert("No reschedule history for this match.");return;}alert(data.map(x=>`${new Date(x.changed_at).toLocaleString()}\n${fmtDate(x.old_date)} ${fmtTime(x.old_time)} → ${fmtDate(x.new_date)} ${fmtTime(x.new_time)}`).join("\n\n"));}
+window.showRescheduleHistory=showRescheduleHistory;
+
+/* ---------- Excel import ---------- */
+$("importBtn").addEventListener("click",()=>$("fileInput").click());
+function statusOf(v){
+  const s=String(v??"").trim();
+  if(!s) return {val:"Pending",note:""};
+  if(/^done$/i.test(s)) return {val:"Done",note:""};
+  if(/^pending$/i.test(s)) return {val:"Pending",note:""};
+  return {val:"Pending",note:s};
+}
+function typeOf(v){
+  const s=String(v??"").trim().toUpperCase();
+  if(s.includes("ODI")) return "ODI";
+  if(s.includes("T20")) return "T20";
+  return "";
+}
+$("fileInput").addEventListener("change",async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  if(typeof XLSX==="undefined"){alert("Excel library failed to load. Check your internet connection and refresh the page.");return;}
+  const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:"",raw:true});
+  const norm=o=>{const r={};for(const k in o)r[String(k).trim().toLowerCase().replace(/\s+/g," ")]=o[k];return r;};
+  const {data:existing,error:ee}=await client.from("matches").select("match_date,match_time,series,match");
+  if(ee){alert(ee.message);return;}
+  const kf=(d,t,s,m)=>[d,String(t||"").slice(0,5),String(s).trim().toLowerCase(),String(m).trim().toLowerCase()].join("|");
+  const seen=new Set((existing||[]).map(r=>kf(r.match_date,r.match_time,r.series,r.match)));
+  const out=[],bad=[];let skipped=0;
+  const serType={};
+  rows.forEach(raw=>{const x=norm(raw);const t=typeOf(x["odi/t20"]||x["odi / t20"]||x["odi t20"])||typeOf(x["match"]);const sr=String(x["series"]||"").trim().toLowerCase();if(t&&sr&&!serType[sr])serType[sr]=t;});
+  rows.forEach((raw,i)=>{
+    const x=norm(raw);
+    const series=String(x["series"]||"").trim(), match=String(x["match"]||"").trim();
+    if(!series&&!match) return;
+    const d=excelDate(x["date"]);
+    if(!d){bad.push("Row "+(i+2)+": could not read the date");return;}
+    const type=typeOf(x["odi/t20"]||x["odi / t20"]||x["odi t20"])||typeOf(match)||serType[series.toLowerCase()]||"";
+    if(!type){bad.push("Row "+(i+2)+": could not determine ODI/T20");return;}
+    const t=excelTime(x["time"]);
+    const rec=statusOf(x["recorded"]||x["record"]), upl=statusOf(x["uploaded"]||x["upload"]);
+    const remarks=[String(x["recording remarks"]||"").trim(),rec.note,upl.note].filter(Boolean).join(" | ");
+    const ex=Number(x["expected overs"]||x["expected"]);
+    const key=kf(d,t,series,match);
+    if(seen.has(key)){skipped++;return;}
+    seen.add(key);
+    const nr={format:String(x["format"]||"Cricket").trim()||"Cricket",match_date:d,match_time:t,series,match,odi_t20:type,expected_overs:(ex===40||ex===100)?ex:overs(type),recorded:rec.val,uploaded:upl.val,recording_remarks:remarks};
+    const stx=ALL_ST.find(z=>z.toLowerCase()===String(x["status"]||"").trim().toLowerCase());
+    if(stx) Object.assign(nr,deriveFlags(stx));
+    if(hasStatus!==false) nr.status=stx||effStatus(nr);
+    if(hasExtra!==false) nr.video_link=safeLink(x["upload link"]||x["link"]);
+    if(hasCam!==false) nr.camera=normCam(x["camera"]);
+    if(hasV24!==false){nr.operator=String(x["operator"]||"").trim();nr.stream_platforms=normPlats(x["live platforms"]);nr.stream_link=safeLink(x["stream link"]);}
+    out.push(nr);
+  });
+  let n=0;
+  for(let k=0;k<out.length;k+=100){
+    const chunk=out.slice(k,k+100);
+    const {error}=await client.from("matches").insert(chunk);
+    if(!error){n+=chunk.length;continue;}
+    for(const r of chunk){const {error:e2}=await client.from("matches").insert(r); if(e2) bad.push(r.series+" | "+r.match+": "+e2.message); else n++;}
+  }
+  alert(n+" match(es) imported.\n"+skipped+" already existed (skipped).\n"+bad.length+" row(s) with problems."+(bad.length?"\n\n"+bad.slice(0,5).join("\n"):""));
+  render();
+ }catch(err){alert("Import failed: "+err.message)} e.target.value="";
+});
+function excelDate(v){
+  if(typeof v==="number"){const d=XLSX.SSF.parse_date_code(v);return d?`${d.y}-${pad(d.m)}-${pad(d.d)}`:null}
+  return parseDMY(v);
+}
+function excelTime(v){
+  if(typeof v==="number"){const mins=Math.round((v%1)*1440);return `${pad(Math.floor(mins/60)%24)}:${pad(mins%60)}:00`;}
+  const m=String(v||"").trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?$/);
+  if(!m) return null;
+  let h=+m[1]; const ap=(m[3]||"").toUpperCase();
+  if(ap==="PM"&&h<12)h+=12; if(ap==="AM"&&h===12)h=0;
+  return `${pad(h)}:${m[2]}:00`;
+}
+/* ---------- Auto Fetch from CricAPI (series name -> all matches) ---------- */
+let afRows=[];
+const AF="https://api.cricapi.com/v1/";
+$("afKey").value=localStorage.getItem("cricapi_key")||"";
+function afMsg(t){$("afMsg").textContent=t||"";}
+async function afCall(path,params){
+  const key=$("afKey").value.trim(); if(!key) throw new Error("Enter your CricAPI key.");
+  localStorage.setItem("cricapi_key",key);
+  const u=AF+path+"?"+new URLSearchParams({apikey:key,...params});
+  const r=await fetch(u); const j=await r.json();
+  if(j.status&&j.status!=="success") throw new Error(j.reason||"API error");
+  return j;
+}
+function afIST(gmt){ // GMT string -> date/time in chosen time zone
+  if(!gmt) return null;
+  const d=new Date(String(gmt).replace(" ","T").replace(/Z?$/,"Z")); if(isNaN(d)) return null;
+  const tz=$("afTZ").value;
+  if(tz==="local") return {date:`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,time:`${pad(d.getHours())}:${pad(d.getMinutes())}:00`};
+  const t=tz==="ist"?new Date(d.getTime()+330*60000):d;
+  return {date:`${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}`,time:`${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:00`};
+}
+function afType(m){
+  const mt=String(m.matchType||"").toUpperCase();
+  if(mt.includes("ODI")) return "ODI"; if(mt.includes("T20")) return "T20";
+  return typeOf(m.name);
+}
+$("afSearchBtn").addEventListener("click",async()=>{
+  const q=$("afSeries").value.trim(); if(!q){alert("Enter a series name.");return;}
+  afMsg("Searching..."); $("afSaveBtn").classList.add("hidden"); $("afPrevWrap").classList.add("hidden");
+  try{
+    const j=await afCall("series",{offset:0,search:q});
+    const list=j.data||[];
+    if(!list.length){afMsg("No series found with that name. Try a shorter name.");$("afPick").classList.add("hidden");$("afGetBtn").classList.add("hidden");return;}
+    $("afSelect").innerHTML=list.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} (${esc(x.startDate||"")} - ${esc(x.endDate||"")})</option>`).join("");
+    $("afPick").classList.remove("hidden"); $("afGetBtn").classList.remove("hidden");
+    afMsg(list.length+" series found. Select the right one, then tap Fetch matches.");
+  }catch(e){afMsg("Error: "+e.message);}
+});
+$("afGetBtn").addEventListener("click",async()=>{
+  const id=$("afSelect").value; if(!id) return;
+  const sname=$("afSelect").selectedOptions[0].textContent.replace(/\s*\([^()]*\)\s*$/,"").trim();
+  afMsg("Loading matches..."); 
+  try{
+    const j=await afCall("series_info",{id});
+    let ml=(j.data&&j.data.matchList)||j.matchList||[];
+    if(!ml.length){ // fallback: search the matches list by series_id
+      let off=0,total=1e9,pages=0;
+      while(off<total&&pages<20){
+        afMsg("Series info was empty. Searching the matches list... (page "+(pages+1)+")");
+        const jm=await afCall("matches",{offset:off});
+        const arr=jm.data||[]; total=(jm.info&&jm.info.totalRows)||0;
+        ml=ml.concat(arr.filter(x=>x.series_id===id));
+        if(!arr.length) break; off+=arr.length; pages++;
+      }
+    }
+    afRows=[]; let skipped=0, tmp=[];
+    for(const m of ml){ const dt=afIST(m.dateTimeGMT||m.date); if(!dt||!m.name){skipped++;continue;} tmp.push({m,dt,type:afType(m)}); }
+    const known=tmp.map(x=>x.type).filter(Boolean);
+    const guess=known.length?(known.filter(t=>t==="ODI").length>known.length/2?"ODI":"T20"):"";
+    for(const x of tmp){
+      const type=x.type||guess; if(!type){skipped++;continue;}
+      afRows.push({format:"Cricket",match_date:x.dt.date,match_time:x.dt.time,series:sname,match:String(x.m.name).trim(),odi_t20:type,expected_overs:overs(type),recorded:"Pending",uploaded:"Pending",recording_remarks:""});
+    }
+    afRows.sort((a,b)=>(a.match_date+a.match_time).localeCompare(b.match_date+b.match_time));
+    $("afPrev").innerHTML=afRows.map(r=>`<tr><td>${fmtDate(r.match_date)}</td><td>${fmtTime(r.match_time)}</td><td>${esc(r.match)}</td><td>${r.odi_t20}</td></tr>`).join("");
+    $("afPrevWrap").classList.toggle("hidden",!afRows.length);
+    $("afSaveBtn").classList.toggle("hidden",!afRows.length);
+    afMsg(afRows.length+" matches found"+(skipped?" ("+skipped+" skipped: no date or format)":"")+". Times use the time zone selected above. Review, then tap Save all to app.");
+  }catch(e){afMsg("Error: "+e.message);}
+});
+$("afSaveBtn").addEventListener("click",async()=>{
+  if(!afRows.length) return;
+  $("afSaveBtn").disabled=true;
+  const {data:ex,error:ee}=await client.from("matches").select("match_date,match_time,series,match");
+  if(ee){alert(ee.message);$("afSaveBtn").disabled=false;return;}
+  const kf=r=>[r.match_date,String(r.match_time||"").slice(0,5),String(r.series).trim().toLowerCase(),String(r.match).trim().toLowerCase()].join("|");
+  const seen=new Set((ex||[]).map(kf));
+  const out=afRows.filter(r=>!seen.has(kf(r)));
+  let n=0,err="";
+  for(let k=0;k<out.length;k+=100){const {error}=await client.from("matches").insert(out.slice(k,k+100)); if(error){err=error.message;break;} n+=Math.min(100,out.length-k);}
+  $("afSaveBtn").disabled=false;
+  alert(n+" match(es) added.\n"+(afRows.length-out.length)+" already existed (skipped)."+(err?"\nError: "+err:""));
+  if(!err){afRows=[];$("afPrevWrap").classList.add("hidden");$("afSaveBtn").classList.add("hidden");afMsg("");}
+  render();
+});
+
+/* ================= v20: Status workflow ================= */
+const FLOW=["Scheduled","Recording","Recorded","Editing","Uploaded"];
+const INACTIVE=["Postponed","Abandoned","Cancelled"];
+const ALL_ST=[...FLOW,...INACTIVE];
+let hasStatus=null, offlineMode=false;
+function effStatus(r){
+  if(r.status && r.status!=="Scheduled") return r.status;
+  if(r.uploaded==="Done") return "Uploaded";
+  if(r.recorded==="Done") return "Recorded";
+  return "Scheduled";
+}
+function deriveFlags(st){
+  if(st==="Uploaded") return {recorded:"Done",uploaded:"Done"};
+  if(st==="Recorded"||st==="Editing") return {recorded:"Done",uploaded:"Pending"};
+  if(st==="Scheduled"||st==="Recording") return {recorded:"Pending",uploaded:"Pending"};
+  return {};
+}
+function statusCell(r){
+  const cur=effStatus(r);
+  if(!can("status")) return `<span class="pill ${cur==="Uploaded"?"done":"pending"}">${esc(cur)}</span>`;
+  return `<select class="st-select st-${cur}" onchange="setStatus('${r.id}',this.value)">${ALL_ST.map(x=>`<option${x===cur?" selected":""}>${x}</option>`).join("")}</select>`;
+}
+window.setStatus=async(id,val)=>{
+  if(hasStatus===false&&INACTIVE.includes(val)){alert("Run add_status_column.sql in Supabase first to use "+val+".");render();return;}
+  const upd=deriveFlags(val); if(hasStatus!==false) upd.status=val;
+  const {error}=await client.from("matches").update(upd).eq("id",id);
+  if(error)alert(error.message); render();
+};
+$("status").addEventListener("change",()=>{const f=deriveFlags($("status").value);if(f.recorded){$("recorded").value=f.recorded;$("uploaded").value=f.uploaded;}});
+function syncStatusFromFlags(){
+  if(INACTIVE.includes($("status").value))return;
+  $("status").value=$("uploaded").value==="Done"?"Uploaded":$("recorded").value==="Done"?(["Editing"].includes($("status").value)?"Editing":"Recorded"):($("status").value==="Recording"?"Recording":"Scheduled");
+}
+$("recorded").addEventListener("change",syncStatusFromFlags);$("uploaded").addEventListener("change",syncStatusFromFlags);
+
+/* ================= v20: Offline cache ================= */
+const CACHE_KEY="cmm_cache_v20";
+function saveCache(d){try{localStorage.setItem(CACHE_KEY,JSON.stringify(d||[]));}catch(e){}}
+function loadCache(){try{const v=localStorage.getItem(CACHE_KEY);return v?JSON.parse(v):null;}catch(e){return null;}}
+function setOffline(on){offlineMode=on;$("offlineBar").classList.toggle("hidden",!on);}
+window.addEventListener("offline",()=>setOffline(true));
+window.addEventListener("online",()=>{if(!$("app").classList.contains("hidden"))render();});
+
+/* ================= v20: Needs attention + reminders ================= */
+const startOf=r=>new Date(r.match_date+"T"+(r.match_time||"00:00:00"));
+const human=m=>{m=Math.max(0,Math.round(m));const d=Math.floor(m/1440),h=Math.floor(m%1440/60),mi=m%60;return d?`${d}d ${h}h`:h?`${h}h ${mi}m`:`${mi}m`;};
+function attentionItems(rows){
+  const now=new Date(),out=[];
+  for(const r of rows){
+    const st=effStatus(r); if(INACTIVE.includes(st)||st==="Uploaded") continue;
+    const mins=(startOf(r)-now)/60000;
+    if(mins>=0&&mins<=1440&&(st==="Scheduled"||st==="Recording")) out.push({r,kind:"soon",txt:`Starts in ${human(mins)}`,mins});
+    else if(mins<0&&st==="Scheduled") out.push({r,kind:"late",txt:`Match time passed ${human(-mins)} ago - still Scheduled`,mins});
+    else if(false) out.push({r,kind:"late",txt:`${st} - upload pending for ${Math.floor(-mins/1440)} day(s)`,mins});
+  }
+  return out.sort((a,b)=>(a.kind==="soon"?0:1)-(b.kind==="soon"?0:1)||Math.abs(a.mins)-Math.abs(b.mins));
+}
+function renderAttention(rows){
+  const items=attentionItems(rows).concat(overdueItems(rows)).concat(computeClashes(rows).slice(0,10).map(([a,b])=>({r:a,kind:"late",txt:(a.camera&&a.camera===b.camera?`⚠ SAME CAMERA (${a.camera}) as ${b.match}`:`⚠ Overlaps with ${b.match} (${fmtTime(b.match_time)}) - give a different camera`),mins:(startOf(a)-new Date())/60000})));
+  $("attentionEmpty").classList.toggle("hidden",items.length>0);
+  $("attentionList").innerHTML=items.slice(0,20).map(({r,kind,txt})=>`<div class="att-item ${kind}"><div><strong>${esc(r.match)}</strong><small>${esc(r.camera?r.camera+" | ":"")}${esc(r.series)} | ${esc(fmtDate(r.match_date))} ${esc(fmtTime(r.match_time))} | ${esc(txt)}</small></div><div>${statusCell(r)} ${can("edit")?`<button class="small-btn edit" onclick="editMatch('${r.id}')">Edit</button>`:""}</div></div>`).join("")+(items.length>20?`<p class="rem-note">+${items.length-20} more</p>`:"");
+  document.title=(items.length?`(${items.length}) `:"")+"Cricket Match Manager - Online";
+}
+const REM_KEY="cmm_rem_v21_alarm15",FIRED_KEY="cmm_fired_v21_alarm15";
+const remCfg=()=>{try{return Object.assign({on:false,lead:15,overdue:true},JSON.parse(localStorage.getItem(REM_KEY)||"{}"));}catch(e){return {on:false,lead:15,overdue:true};}};
+const saveRem=c=>{try{localStorage.setItem(REM_KEY,JSON.stringify(c));}catch(e){}};
+const fired=()=>{try{return JSON.parse(localStorage.getItem(FIRED_KEY)||"{}");}catch(e){return {};}};
+const saveFired=f=>{try{const cut=Date.now()-3*864e5;for(const k in f)if(f[k]<cut)delete f[k];localStorage.setItem(FIRED_KEY,JSON.stringify(f));}catch(e){}};
+async function notify(title,body,tag){
+  if(!("Notification" in window)||Notification.permission!=="granted") return false;
+  try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+    if(reg){await reg.showNotification(title,{body,tag,icon:"icon-192.png",badge:"icon-192.png"});return true;}}catch(e){}
+  try{new Notification(title,{body,tag,icon:"icon-192.png"});return true;}catch(e){return false;}
+}
+function remUI(){
+  const c=remCfg(),ok=("Notification" in window)&&Notification.permission==="granted"&&c.on;
+  $("remLead").value=String(c.lead);$("remOverdue").checked=!!c.overdue;
+  $("remEnableBtn").textContent=ok?"Reminders ON (tap to turn off)":"Enable reminders";
+  $("remMsg").textContent=!("Notification" in window)?"This browser does not support notifications. Install the app (Chrome / Add to Home Screen) or use a full browser.":
+    Notification.permission==="denied"?"Notifications are blocked for this site. Allow them in browser settings.":ok?"Reminders are active on this device.":"";
+}
+$("remEnableBtn").addEventListener("click",async()=>{
+  const c=remCfg();
+  if(c.on&&("Notification" in window)&&Notification.permission==="granted"){c.on=false;saveRem(c);remUI();return;}
+  if(!("Notification" in window)){remUI();return;}
+  const p=await Notification.requestPermission();
+  c.on=p==="granted";saveRem(c);remUI();if(c.on)notify("Reminders enabled","You will be alerted before each match.","cmm-enabled");
+});
+$("remTestBtn").addEventListener("click",async()=>{const ok=await notify("Test reminder","Notifications are working.","cmm-test");if(!ok)$("remMsg").textContent="Could not show a notification. Tap Enable reminders and allow permission first.";});
+$("remLead").addEventListener("change",()=>{const c=remCfg();c.lead=+$("remLead").value;saveRem(c);});
+$("remOverdue").addEventListener("change",()=>{const c=remCfg();c.overdue=$("remOverdue").checked;saveRem(c);});
+async function checkReminders(){
+  const c=remCfg(); if(!c.on||$("app").classList.contains("hidden")||!allMatches.length) return;
+  const f=fired(),now=new Date(); let changed=false;
+  for(const r of allMatches){
+    if(mineOnly()&&!isMine(r)) continue;
+    const st=effStatus(r); if(INACTIVE.includes(st)||st==="Uploaded"||st==="Recorded"||st==="Editing") continue;
+    const mins=(startOf(r)-now)/60000, base=`${r.id}|${r.match_date}|${String(r.match_time||"").slice(0,5)}`;
+    if(mins>0&&mins<=c.lead&&!f[base+"|lead"]){f[base+"|lead"]=Date.now();changed=true;await notify(`🔔 Match starts in ${human(mins)}`,`${r.match} (${r.series}) at ${fmtTime(r.match_time)}${r.camera?" - "+r.camera:""}. Start recording preparation now.`,base+"|lead");}
+    if(mins<=0&&mins>-10&&!f[base+"|start"]){f[base+"|start"]=Date.now();changed=true;await notify("Match starting now",`${r.match} (${r.series}) - start recording${r.camera?" on "+r.camera:""}`,base+"|start");}
+  }
+  if(c.overdue){
+    const day="od-"+new Date().toISOString().slice(0,10);
+    if(!f[day]){const late=attentionItems(allMatches).concat(overdueItems(allMatches)).filter(x=>x.kind==="late"&&(!mineOnly()||isMine(x.r)));
+      if(late.length){f[day]=Date.now();changed=true;await notify(`${late.length} match(es) need attention`,late.slice(0,3).map(x=>x.r.match).join(", "),day);}}
+  }
+  if(changed)saveFired(f);
+}
+setInterval(()=>{if(!$("app").classList.contains("hidden")){renderAttention(allMatches);checkReminders();}},30000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderAttention(allMatches);checkReminders();}});
+remUI();
+
+/* ================= v20: PWA ================= */
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").classList.remove("hidden");});
+$("installBtn").addEventListener("click",async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$("installBtn").classList.add("hidden");});
+window.addEventListener("appinstalled",()=>$("installBtn").classList.add("hidden"));
+if("serviceWorker" in navigator&&location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+
+/* ================= v21: overlap warning ================= */
+let hasExtra=null; const sel=new Set(); let undoAct=null,undoTimer=null,ckId=null,clashSet=new Set();
+const durH=r=>r.odi_t20==="ODI"?8:3.5;   /* estimated match length in hours */
+const endOf=r=>new Date(startOf(r).getTime()+durH(r)*36e5);
+function clashesWith(row,exceptId){return allMatches.filter(o=>o.id!==exceptId&&!INACTIVE.includes(effStatus(o))&&startOf(o)<endOf(row)&&startOf(row)<endOf(o)&&camOk(row,o));}
+function computeClashes(rows){
+  const now=Date.now(),pairs=[]; clashSet=new Set();
+  const act=rows.filter(r=>!INACTIVE.includes(effStatus(r))&&endOf(r)>now).sort((a,b)=>startOf(a)-startOf(b));
+  for(let i=0;i<act.length;i++)for(let j=i+1;j<act.length&&startOf(act[j])<endOf(act[i]);j++){if(!camOk(act[i],act[j]))continue;clashSet.add(act[i].id);clashSet.add(act[j].id);pairs.push([act[i],act[j]]);}
+  return pairs;
+}
+
+/* ================= v21: toast + undo ================= */
+function setUndo(msg,fn){clearTimeout(undoTimer);undoAct=fn;$("toastMsg").textContent=msg;$("toastUndo").classList.toggle("hidden",!fn);$("toast").classList.remove("hidden");undoTimer=setTimeout(hideToast,12000);}
+function hideToast(){$("toast").classList.add("hidden");undoAct=null;}
+$("toastUndo").addEventListener("click",async()=>{const f=undoAct;hideToast();if(f){try{await f();}catch(e){alert("Undo failed: "+(e.message||e));}await render();}});
+const cleanRow=r=>{const {seq,user_id,...x}=r;return x;};
+async function deleteRows(rows,label){
+  if(!rows.length)return;
+  const ids=rows.map(r=>r.id); let hist=[];
+  try{for(let i=0;i<ids.length;i+=100){const h=await client.from("match_reschedule_history").select("*").in("match_id",ids.slice(i,i+100));if(!h.error&&h.data)hist=hist.concat(h.data);}}catch(e){}
+  for(let i=0;i<ids.length;i+=100){const part=ids.slice(i,i+100);const {data:dd,error}=await client.from("matches").delete().in("id",part).select("id");if(error||!dd||dd.length<part.length){alert(error?error.message:"Some matches were not deleted - you may not have permission.");await render();return;}}
+  ids.forEach(i=>sel.delete(i));
+  const snap=rows.map(cleanRow);
+  setUndo(label,async()=>{
+    for(let i=0;i<snap.length;i+=100){const {error}=await client.from("matches").insert(snap.slice(i,i+100));if(error)throw error;}
+    for(let i=0;i<hist.length;i+=100){await client.from("match_reschedule_history").insert(hist.slice(i,i+100).map(({user_id,...h})=>h));}
+  });
+  await render();
+}
+window.deleteMatch=async id=>{const r=allMatches.find(x=>x.id===id);if(r)await deleteRows([r],"Match deleted");};
+window.setStatus=async(id,val)=>{
+  if(hasStatus===false&&INACTIVE.includes(val)){alert("Run add_status_column.sql in Supabase first to use "+val+".");render();return;}
+  const r=allMatches.find(x=>x.id===id); const old={recorded:r?r.recorded:"Pending",uploaded:r?r.uploaded:"Pending"}; if(hasStatus!==false&&r)old.status=r.status||"Scheduled";
+  const upd=deriveFlags(val); if(hasStatus!==false)upd.status=val;
+  const {data:ud,error}=await client.from("matches").update(upd).eq("id",id).select("id");
+  if(error||!(ud&&ud.length)){alert(error?error.message:"Not allowed: you do not have permission for this change.");render();return;}
+  setUndo("Status set to "+val,async()=>{await client.from("matches").update(old).eq("id",id);}); render();
+};
+
+/* ================= v21: multi-select + bulk actions ================= */
+function updateBulkBar(){
+  for(const id of [...sel]) if(!allMatches.some(r=>r.id===id)) sel.delete(id);
+  $("bulkBar").classList.toggle("hidden",!sel.size); $("selCount").textContent=sel.size+" selected";
+  const vis=[...document.querySelectorAll("#matchTable .rowchk")]; $("selAll").checked=vis.length>0&&vis.every(c=>c.checked);
+}
+$("matchTable").addEventListener("change",e=>{const c=e.target;if(c.classList&&c.classList.contains("rowchk")){c.checked?sel.add(c.dataset.id):sel.delete(c.dataset.id);updateBulkBar();}});
+$("selAll").addEventListener("change",()=>{const on=$("selAll").checked;document.querySelectorAll("#matchTable .rowchk").forEach(c=>{c.checked=on;on?sel.add(c.dataset.id):sel.delete(c.dataset.id);});updateBulkBar();});
+$("bulkClearBtn").addEventListener("click",()=>{sel.clear();document.querySelectorAll(".rowchk").forEach(c=>c.checked=false);updateBulkBar();});
+const selRows=()=>allMatches.filter(r=>sel.has(r.id));
+$("bulkStatusBtn").addEventListener("click",async()=>{
+  const rows=selRows(); if(!rows.length)return; const val=$("bulkStatus").value;
+  if(hasStatus===false&&INACTIVE.includes(val)){alert("Run add_status_column.sql in Supabase first to use "+val+".");return;}
+  const old=rows.map(r=>({id:r.id,recorded:r.recorded,uploaded:r.uploaded,status:r.status}));
+  const upd=deriveFlags(val); if(hasStatus!==false)upd.status=val;
+  const ids=rows.map(r=>r.id);
+  for(let i=0;i<ids.length;i+=100){const part=ids.slice(i,i+100);const {data:ud,error}=await client.from("matches").update(upd).in("id",part).select("id");if(error||!ud||ud.length<part.length){alert(error?error.message:"Some matches were not changed - you may not have permission.");await render();return;}}
+  setUndo(`${rows.length} match(es) set to ${val}`,async()=>{await Promise.all(old.map(o=>{const u={recorded:o.recorded,uploaded:o.uploaded};if(hasStatus!==false&&o.status)u.status=o.status;return client.from("matches").update(u).eq("id",o.id);}));});
+  await render();
+});
+const addDays=(iso,n)=>{const [y,m,d]=iso.split("-").map(Number);return new Date(Date.UTC(y,m-1,d+n)).toISOString().slice(0,10);};
+$("bulkShiftBtn").addEventListener("click",async()=>{
+  const n=parseInt($("bulkShift").value,10),rows=selRows();
+  if(!rows.length)return; if(!n){alert("Enter a non-zero number of days (negative = earlier).");return;}
+  if(!confirm(`Move ${rows.length} match(es) by ${n} day(s)?`))return;
+  const hist=rows.map(r=>({match_id:r.id,old_date:r.match_date,old_time:r.match_time,new_date:addDays(r.match_date,n),new_time:r.match_time,series:r.series,match_name:r.match,changed_at:new Date().toISOString()}));
+  const h=await client.from("match_reschedule_history").insert(hist).select("id"); const histIds=h.error?[]:(h.data||[]).map(x=>x.id);
+  const res=await Promise.all(rows.map((r,i)=>client.from("matches").update({match_date:hist[i].new_date}).eq("id",r.id)));
+  const bad=res.find(x=>x.error); if(bad)alert(bad.error.message);
+  setUndo(`${rows.length} match(es) moved by ${n} day(s)`+(h.error?" (history not saved)":""),async()=>{
+    await Promise.all(rows.map(r=>client.from("matches").update({match_date:r.match_date}).eq("id",r.id)));
+    if(histIds.length)await client.from("match_reschedule_history").delete().in("id",histIds);
+  });
+  await render();
+});
+$("bulkDelBtn").addEventListener("click",async()=>{const rows=selRows();if(!rows.length)return;if(!confirm(`Delete ${rows.length} selected match(es)?`))return;await deleteRows(rows,`${rows.length} match(es) deleted`);});
+
+/* ================= v21: checklist + upload link ================= */
+const CK=["rec","trim","thumb","title","upl"];
+const ckOf=r=>(r.checklist&&typeof r.checklist==="object")?r.checklist:{};
+const ckCount=r=>CK.filter(k=>ckOf(r)[k]).length;
+const safeLink=u=>/^https?:\/\//i.test(String(u||"").trim())?String(u).trim():"";
+function ckCell(r){const n=ckCount(r),l=safeLink(r.video_link);return `<button class="small-btn" onclick="openCk('${r.id}')">${n}/5</button>`+(l?` <a href="${esc(l)}" target="_blank" rel="noopener">&#9654; link</a>`:"");}
+window.openCk=id=>{const r=allMatches.find(x=>x.id===id);if(!r)return;ckId=id;$("ckTitle").textContent=r.match;CK.forEach(k=>$("ck_"+k).checked=!!ckOf(r)[k]);$("ckLink").value=r.video_link||"";{const pl=(r.stream_platforms||"").split(", ");document.querySelectorAll(".str-p").forEach(c=>c.checked=pl.includes(c.value));$("strLink").value=r.stream_link||"";$("genOut").classList.add("hidden");}$("ckModal").classList.remove("hidden");};
+$("ckCancel").addEventListener("click",()=>$("ckModal").classList.add("hidden"));
+$("ckModal").addEventListener("click",e=>{if(e.target===$("ckModal"))$("ckModal").classList.add("hidden");});
+$("ckSave").addEventListener("click",async()=>{
+  if(!can("status")){alert("You do not have permission to change the checklist.");return;}
+  if(hasExtra===false){alert("Run add_v21_columns.sql in Supabase first.");return;}
+  const link=$("ckLink").value.trim(); if(link&&!safeLink(link)){alert("Link must start with http:// or https://");return;}
+  const r=allMatches.find(x=>x.id===ckId); if(!r)return;
+  const old={checklist:ckOf(r),video_link:r.video_link||"",...(hasV24!==false?{stream_platforms:r.stream_platforms||"",stream_link:r.stream_link||""}:{})}, nw={checklist:Object.fromEntries(CK.map(k=>[k,$("ck_"+k).checked])),video_link:link,...(hasV24!==false?{stream_platforms:[...document.querySelectorAll(".str-p")].filter(c=>c.checked).map(c=>c.value).join(", "),stream_link:safeLink($("strLink").value)}:{})};
+  const {error}=await client.from("matches").update(nw).eq("id",ckId); if(error){alert(error.message);return;}
+  $("ckModal").classList.add("hidden"); setUndo("Checklist saved",async()=>{await client.from("matches").update(old).eq("id",ckId);}); await render();
+});
+
+/* ================= v22.1: username login ================= */
+const USERNAME_DOMAIN="cricketmatch.app";   /* usernames are stored as username@this-domain; change only before creating users */
+function toLoginEmail(v){
+  v=String(v||"").trim().toLowerCase();
+  if(v.includes("@")) return (/^[a-z0-9][a-z0-9._%+-]*@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(v)&&!v.split("@")[0].includes("..")&&!v.split("@")[0].endsWith("."))?v:null;
+  return /^[a-z0-9]{3,20}$/.test(v)?v+"@"+USERNAME_DOMAIN:null;
+}
+const dispName=e=>{e=String(e||"");return e.toLowerCase().endsWith("@"+USERNAME_DOMAIN)?e.slice(0,e.lastIndexOf("@")):e;};
+
+/* ================= v22: admin / user roles ================= */
+let ME=null, USERS=[];
+const PERMS=[["view","View matches"],["add","Add / import"],["edit","Edit all fields"],["status","Status & checklist"],["delete","Delete"],["export","Export / backup"]];
+const PRESETS={Viewer:{view:1,export:1},Recorder:{view:1,status:1,export:1},Editor:{view:1,add:1,edit:1,status:1,export:1},Full:{view:1,add:1,edit:1,status:1,delete:1,export:1},None:{}};
+const isAdmin=()=>!!ME&&(ME.legacy||ME.role==="admin");
+const can=p=>!ME||ME.legacy||ME.role==="admin"||!!ME["can_"+p];
+async function loadProfile(session){
+  const {data,error}=await client.from("profiles").select("*").eq("user_id",session.user.id).maybeSingle();
+  if(error){ME={legacy:true,role:"admin",approved:true};$("rolesBar").classList.remove("hidden");return;}
+  $("rolesBar").classList.add("hidden");
+  ME=data||{role:"user",approved:false,email:session.user.email};
+}
+async function setAuthUI(session){
+  if(!session){
+    ME=null;try{localStorage.removeItem(CACHE_KEY);}catch(e){}
+    $("pendingScreen").classList.add("hidden"); setAuthUI_base(null); return;
+  }
+  await loadProfile(session);
+  if(!ME.legacy&&ME.role!=="admin"&&!ME.approved){
+    $("loginScreen").classList.add("hidden");$("app").classList.add("hidden");
+    $("pendingScreen").classList.remove("hidden");$("pendEmail").textContent=dispName(session.user.email);return;
+  }
+  $("pendingScreen").classList.add("hidden");
+  applyPerms(); setAuthUI_base(session); $("userEmail").textContent=dispName(session.user.email);
+  if(isAdmin()&&!ME.legacy) loadUsers();
+}
+$("pendRefresh").addEventListener("click",async()=>{const {data}=await client.auth.getSession();setAuthUI(data.session);});
+$("pendLogout").addEventListener("click",()=>client.auth.signOut());
+function applyPerms(){
+  const show=(id,on)=>{const e=$(id);if(e)e.classList.toggle("hidden",!on);};
+  show("secAuto",can("add"));show("secBulk",can("add"));show("secEntry",can("add")||can("edit"));
+  show("importBtn",can("add"));show("restoreBtn",can("add"));show("backupBtn",can("export"));show("clearAllBtn",isAdmin());
+  show("rangeExcelBtn",can("export"));show("reportBox",can("export"));show("monthDownloadButtons",can("export"));
+  show("bulkStatus",can("status"));show("bulkStatusBtn",can("status"));show("bulkShift",can("edit"));show("bulkShiftBtn",can("edit"));show("bulkDelBtn",can("delete"));
+  show("secAdmin",isAdmin()&&!ME.legacy);
+  const rb=$("roleBadge");rb.classList.toggle("hidden",!!ME.legacy);rb.textContent=ME.role==="admin"?"Admin":"User";
+}
+
+/* ----- admin panel ----- */
+async function loadUsers(){
+  const {data,error}=await client.from("profiles").select("*").order("created_at",{ascending:true});
+  if(error){$("usersList").textContent=error.message;return;}
+  USERS=data||[]; renderUsers();
+}
+function renderUsers(){
+  const pend=USERS.filter(u=>!u.approved&&u.role!=="admin").length;
+  $("pendBadge").textContent=pend+" pending";$("pendBadge").classList.toggle("hidden",!pend);
+  $("pendBar").textContent=pend?`${pend} user(s) waiting for approval - tap to review`:"";$("pendBar").classList.toggle("hidden",!pend);
+  $("usersList").innerHTML=USERS.map(u=>{
+    const me=u.user_id===(ME&&ME.user_id), adm=u.role==="admin";
+    const state=adm?"Admin":u.approved?"Active":"Pending / blocked";
+    return `<div class="ucard${!u.approved&&!adm?" pend":""}" data-id="${esc(u.user_id)}">
+     <div class="uhead"><strong>${esc(dispName(u.email)||u.user_id)}</strong><span class="pill ${u.approved||adm?"done":"pending"}">${state}</span>${me?"<em>(you)</em>":""}</div>
+     <div class="ugrid">
+      <label>Role<select class="u-role"${me?" disabled":""}><option value="user"${!adm?" selected":""}>User</option><option value="admin"${adm?" selected":""}>Admin</option></select></label>
+      <label class="inline-check"><input type="checkbox" class="u-appr"${u.approved||adm?" checked":""}${me?" disabled":""}> Approved</label>
+      <label>Preset<select class="u-preset"><option value="">Choose preset...</option>${Object.keys(PRESETS).map(k=>`<option>${k}</option>`).join("")}</select></label>
+     </div>
+     <div class="uperms">${PERMS.map(([k,l])=>`<label><input type="checkbox" class="u-p" data-p="${k}"${(adm||u["can_"+k])?" checked":""}${adm?" disabled":""}> ${l}</label>`).join("")}</div>
+     <button class="primary u-save">Save</button></div>`;
+  }).join("")||'<p class="empty">No users yet.</p>';
+}
+$("usersRefresh").addEventListener("click",loadUsers);
+$("pendBar").addEventListener("click",()=>{location.hash="users";});
+$("usersList").addEventListener("change",e=>{
+  const c=e.target,card=c.closest(".ucard"); if(!card)return;
+  if(c.classList.contains("u-preset")&&c.value){const pr=PRESETS[c.value];card.querySelectorAll(".u-p").forEach(x=>x.checked=!!pr[x.dataset.p]);c.value="";}
+  if(c.classList.contains("u-appr")&&c.checked&&![...card.querySelectorAll(".u-p")].some(x=>x.checked)){card.querySelectorAll(".u-p").forEach(x=>x.checked=!!PRESETS.Recorder[x.dataset.p]);}
+  if(c.classList.contains("u-role")){const a=c.value==="admin";card.querySelectorAll(".u-p").forEach(x=>{x.disabled=a;if(a)x.checked=true;});if(a)card.querySelector(".u-appr").checked=true;}
+});
+$("usersList").addEventListener("click",async e=>{
+  const b=e.target.closest(".u-save"); if(!b)return;
+  const card=b.closest(".ucard"),id=card.dataset.id;
+  const upd={role:card.querySelector(".u-role").value,approved:card.querySelector(".u-appr").checked};
+  PERMS.forEach(([k])=>{upd["can_"+k]=card.querySelector(`.u-p[data-p="${k}"]`).checked;});
+  if(upd.role==="admin"){upd.approved=true;PERMS.forEach(([k])=>upd["can_"+k]=true);}
+  b.disabled=true;
+  const {data,error}=await client.from("profiles").update(upd).eq("user_id",id).select("user_id");
+  b.disabled=false;
+  if(error||!(data&&data.length)){alert(error?error.message:"Could not save - are you an admin?");return;}
+  setUndo("Permissions saved",null); await loadUsers();
+});
+
+/* ================= v23: camera per match ================= */
+const CAM_COUNT=8;   /* number of cameras you own: change this number if needed */
+const CAMS=Array.from({length:CAM_COUNT},(_,i)=>"Camera "+(i+1));
+let hasCam=null;
+const camOk=(a,b)=>!a.camera||!b.camera||a.camera===b.camera;   /* two different assigned cameras can record at the same time */
+const normCam=v=>{v=String(v||"").trim();if(!v)return"";const m=v.match(/(\d+)/);const n=m?parseInt(m[1],10):0;return(n>=1&&n<=CAM_COUNT)?"Camera "+n:"";};
+const camOpts=(cur,first)=>`<option value="">${first}</option>`+CAMS.map(c=>`<option${c===cur?" selected":""}>${c}</option>`).join("");
+function camCell(r){
+  if(!can("status")) return r.camera?`<span class="pill done">${esc(r.camera)}</span>`:"-";
+  return `<select class="st-select" onchange="setCamera('${r.id}',this.value)">${camOpts(r.camera||"","- none -")}</select>`;
+}
+$("camera").innerHTML=camOpts("","- not set -");
+$("bulkCamera").innerHTML=camOpts("","Choose camera...").replace('<option value="">Choose camera...</option>','<option value="" disabled selected>Choose camera...</option><option value="__clear">- clear camera -</option>');
+$("cameraFilter").innerHTML='<option value="">All cameras</option><option value="__none">No camera set</option>'+CAMS.map(c=>`<option>${c}</option>`).join("");
+window.setCamera=async(id,val)=>{
+  if(hasCam===false){alert("Run add_camera_column.sql in Supabase first.");render();return;}
+  const r=allMatches.find(x=>x.id===id),old=r?(r.camera||""):"";
+  const {data,error}=await client.from("matches").update({camera:val}).eq("id",id).select("id");
+  if(error||!(data&&data.length)){alert(error?error.message:"Not allowed: you do not have permission for this change.");render();return;}
+  setUndo(val?`${val} set`:"Camera cleared",async()=>{await client.from("matches").update({camera:old}).eq("id",id);});render();
+};
+$("bulkCameraBtn").addEventListener("click",async()=>{
+  const rows=selRows(),v=$("bulkCamera").value; if(!rows.length||!v)return;
+  if(hasCam===false){alert("Run add_camera_column.sql in Supabase first.");return;}
+  const val=v==="__clear"?"":v,ids=rows.map(r=>r.id),old=rows.map(r=>({id:r.id,camera:r.camera||""}));
+  for(let i=0;i<ids.length;i+=100){const part=ids.slice(i,i+100);const {data,error}=await client.from("matches").update({camera:val}).in("id",part).select("id");if(error||!data||data.length<part.length){alert(error?error.message:"Some matches were not changed - you may not have permission.");await render();return;}}
+  setUndo(`${rows.length} match(es): ${val||"camera cleared"}`,async()=>{await Promise.all(old.map(o=>client.from("matches").update({camera:o.camera}).eq("id",o.id)));});
+  await render();
+});
+const _applyPerms=applyPerms;
+applyPerms=function(){_applyPerms();const on=can("status");["bulkCamera","bulkCameraBtn"].forEach(i=>$(i).classList.toggle("hidden",!on));};
+
+/* ================= v24: operators, live streams, planner, analytics, admin tools ================= */
+let hasV24=null,TEAM=[],planProp=[],overdueSet=new Set();
+const PLATS=["YouTube","Facebook","JioHotstar","Sony LIV","FanCode","Star Sports","Willow","Other"];
+const normPlats=v=>[...new Set(String(v||"").split(/[,;|]/).map(x=>PLATS.find(p=>p.toLowerCase()===x.trim().toLowerCase())).filter(Boolean))].join(", ");
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const mineOnly=()=>localStorage.getItem("cmm_mine")==="1";
+const dueH=()=>+(localStorage.getItem("cmm_due")||24);
+const myEmail=()=>(ME&&ME.email)||"";
+const isMine=r=>!!r.operator&&r.operator===myEmail();
+$("strBox").innerHTML=PLATS.map(p=>`<label><input type="checkbox" class="str-p" value="${p}">${p}</label>`).join("");
+$("streamFilter").innerHTML='<option value="">All platforms</option>'+PLATS.map(p=>`<option>${p}</option>`).join("");
+$("remMine").checked=mineOnly();$("remMine").addEventListener("change",()=>localStorage.setItem("cmm_mine",$("remMine").checked?"1":"0"));
+$("dueHrs").value=String(dueH());$("dueHrs").addEventListener("change",()=>{localStorage.setItem("cmm_due",$("dueHrs").value);renderAttention(allMatches);render();});
+
+/* live stream cell + title generator */
+function streamCell(r){
+  const pl=r.stream_platforms||"",l=safeLink(r.stream_link);
+  const b=can("status")?`<button class="small-btn" onclick="openCk('${r.id}')">${pl?esc(pl):"+ add"}</button>`:esc(pl||"-");
+  return b+(l?` <a href="${esc(l)}" target="_blank" rel="noopener">&#9654;</a>`:"");
+}
+$("genTitleBtn").addEventListener("click",()=>{
+  const r=allMatches.find(x=>x.id===ckId);if(!r)return;
+  const pl=[...document.querySelectorAll(".str-p")].filter(c=>c.checked).map(c=>c.value).join(", ");
+  const t=`${r.match} | ${r.series} | ${r.odi_t20||"Cricket"} Live | ${fmtDate(r.match_date)}`;
+  const d=`${r.match}\n${r.series} - ${r.odi_t20||"Cricket"} match on ${fmtDate(r.match_date)} at ${fmtTime(r.match_time)}.${pl?`\nLive on: ${pl}`:""}\n\n#cricket #livecricket #${String(r.series||"").replace(/[^a-z0-9]/gi,"")}`;
+  $("genOut").value=t+"\n\n"+d;$("genOut").classList.remove("hidden");$("genOut").select();try{navigator.clipboard.writeText(t+"\n\n"+d);}catch(e){}
+});
+
+/* operator assignment */
+function opCell(r){
+  if(!can("status")||!TEAM.length) return esc(dispName(r.operator)||"-");
+  const list=(!r.operator||TEAM.includes(r.operator))?TEAM:[r.operator,...TEAM];
+  return `<select class="st-select" onchange="setOperator('${r.id}',this.value)"><option value="">- none -</option>${list.map(e=>`<option value="${esc(e)}"${e===r.operator?" selected":""}>${esc(dispName(e))}</option>`).join("")}</select>`;
+}
+window.setOperator=async(id,val)=>{
+  if(hasV24===false){alert("Run add_v24_core.sql in Supabase first.");render();return;}
+  const r=allMatches.find(x=>x.id===id),old=r?(r.operator||""):"";
+  const {data,error}=await client.from("matches").update({operator:val}).eq("id",id).select("id");
+  if(error||!(data&&data.length)){alert(error?error.message:"Not allowed: you do not have permission for this change.");render();return;}
+  setUndo(val?`Assigned to ${dispName(val)}`:"Operator cleared",async()=>{await client.from("matches").update({operator:old}).eq("id",id);});render();
+};
+function fillOpFilter(){const cur=$("operatorFilter").value;$("operatorFilter").innerHTML='<option value="">All operators</option><option value="__me">My matches</option><option value="__none">Unassigned</option>'+TEAM.map(e=>`<option value="${esc(e)}">${esc(dispName(e))}</option>`).join("");$("operatorFilter").value=cur;}
+async function loadTeam(){const {data,error}=await client.rpc("team_list");TEAM=error?[]:(data||[]).map(x=>x.email);fillOpFilter();if(TEAM.length)render();}
+fillOpFilter();
+
+/* upload deadline tracker */
+function overdueItems(rows){
+  overdueSet=new Set();const now=Date.now(),out=[];
+  for(const r of rows){const st=effStatus(r);if(INACTIVE.includes(st)||st==="Uploaded"||st==="Scheduled")continue;
+    const late=(now-endOf(r).getTime())/36e5-dueH();
+    if(late>0){overdueSet.add(r.id);out.push({r,kind:"late",txt:`Upload overdue by ${human(late*60)} (target ${dueH()}h after match)`,mins:-late*60});}}
+  return out;
+}
+
+/* camera planner */
+const dayRows=()=>{const d=$("planDate").value||todayISO();return allMatches.filter(r=>String(r.match_date)===d&&!INACTIVE.includes(effStatus(r))).sort((a,b)=>startOf(a)-startOf(b));};
+function renderPlan(){
+  if(!$("planDate").value)$("planDate").value=todayISO();
+  const day=$("planDate").value,rows=dayRows(),t0=new Date(day+"T00:00:00").getTime();
+  const lane=(lab,list)=>`<div class="tl-row"><div class="tl-lab">${esc(lab)}</div><div class="tl-lane">${list.map(r=>{const l=Math.max(0,(startOf(r)-t0)/864e5*100),w=Math.min(100-l,durH(r)/24*100);return `<div class="tl-bar s-${effStatus(r)}" style="left:${l}%;width:${w}%" title="${esc(r.match+" - "+fmtTime(r.match_time))}">${esc(fmtTime(r.match_time)+" "+r.match)}</div>`;}).join("")}</div></div>`;
+  const hrs=`<div class="tl-row"><div class="tl-lab"></div><div style="flex:1;display:flex;font-size:11px;color:var(--muted)">${[0,3,6,9,12,15,18,21].map(h=>`<span style="width:12.5%">${h}:00</span>`).join("")}</div></div>`;
+  $("planBox").innerHTML=hrs+lane("Not assigned",rows.filter(r=>!r.camera))+CAMS.map(c=>lane(c,rows.filter(r=>r.camera===c))).join("");
+}
+const planShift=n=>{$("planDate").value=addDays($("planDate").value||todayISO(),n);planProp=[];$("planOut").innerHTML="";renderPlan();};
+$("planPrev").addEventListener("click",()=>planShift(-1));$("planNext").addEventListener("click",()=>planShift(1));
+$("planDate").addEventListener("change",()=>{planProp=[];$("planOut").innerHTML="";renderPlan();});
+$("planSuggest").addEventListener("click",()=>{
+  const rows=dayRows(),busy={};CAMS.forEach(c=>busy[c]=rows.filter(r=>r.camera===c));planProp=[];const none=[];
+  for(const r of rows.filter(r=>!r.camera)){const c=CAMS.find(c=>!busy[c].some(o=>startOf(o)<endOf(r)&&startOf(r)<endOf(o)));if(c){busy[c].push(r);planProp.push([r,c]);}else none.push(r);}
+  $("planOut").innerHTML=(planProp.length||none.length)?`<h3 style="margin:12px 0 6px">Suggestion</h3>`+planProp.map(([r,c])=>`<div class="att-item"><div><strong>${esc(r.match)}</strong><small>${esc(fmtTime(r.match_time))}</small></div><b>${c}</b></div>`).join("")+none.map(r=>`<div class="att-item late"><div><strong>${esc(r.match)}</strong><small>No free camera - all ${CAM_COUNT} are busy</small></div></div>`).join("")+((planProp.length&&can("status"))?`<button id="planApply" class="primary">Apply suggestion</button>`:""):'<p class="empty">Every match on this day already has a camera.</p>';
+});
+$("planOut").addEventListener("click",async e=>{
+  if(e.target.id!=="planApply")return; if(hasCam===false){alert("Run add_camera_column.sql in Supabase first.");return;}
+  const g={};planProp.forEach(([r,c])=>(g[c]=g[c]||[]).push(r.id));
+  for(const [c,ids] of Object.entries(g)){const {data,error}=await client.from("matches").update({camera:c}).in("id",ids).select("id");if(error||!data||data.length<ids.length){alert(error?error.message:"Some matches were not changed - you may not have permission.");await render();return;}}
+  const prop=planProp.slice();planProp=[];$("planOut").innerHTML="";
+  setUndo(`${prop.length} camera(s) assigned`,async()=>{for(const [r] of prop)await client.from("matches").update({camera:""}).eq("id",r.id);});await render();
+});
+
+/* analytics */
+function bars(title,pairs){const max=Math.max(1,...pairs.map(p=>p[1]));return `<div class="chart"><h3>${esc(title)}</h3>${pairs.map(([k,v])=>`<div class="crow"><span>${esc(k)}</span><div class="cbar"><i style="width:${v/max*100}%"></i></div><b>${v}</b></div>`).join("")||'<p class="empty">No data</p>'}</div>`;}
+function renderStats(rows){
+  const act=rows.filter(r=>!INACTIVE.includes(effStatus(r)));
+  const cnt=(arr,f)=>{const m={};arr.forEach(r=>{const k=f(r);if(k)m[k]=(m[k]||0)+1;});return Object.entries(m);};
+  const months=[],d=new Date();for(let i=5;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);months.push(x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0"));}
+  const pm=months.map(m=>[m.slice(5)+"/"+m.slice(2,4),act.filter(r=>String(r.match_date).startsWith(m)).length]);
+  const up=act.filter(r=>effStatus(r)==="Uploaded").length;
+  $("statsBox").innerHTML=bars("Matches per month",pm)+bars("By status",ALL_ST.map(x=>[x,rows.filter(r=>effStatus(r)===x).length]).filter(x=>x[1]))+bars("By camera",cnt(act,r=>r.camera))+bars("By operator",cnt(act,r=>r.operator&&dispName(r.operator)))+bars("By live platform",cnt(act.flatMap(r=>String(r.stream_platforms||"").split(", ").filter(Boolean).map(p=>({p}))),x=>x.p))+`<div class="chart"><h3>Upload completion</h3><p style="font-size:28px;margin:6px 0"><b>${act.length?Math.round(up/act.length*100):0}%</b></p><small>${up} of ${act.length} uploaded</small></div>`;
+}
+
+/* calendar export (.ics) */
+const icsT=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+"T"+String(d.getHours()).padStart(2,"0")+String(d.getMinutes()).padStart(2,"0")+"00";
+const icsE=t=>String(t||"").replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+$("backupBtn").insertAdjacentHTML("afterend",'<button id="icsBtn">Calendar (.ics)</button>');
+$("icsBtn").addEventListener("click",()=>{
+  const from=Date.now()-864e5,rows=allMatches.filter(r=>!INACTIVE.includes(effStatus(r))&&startOf(r)>=from);
+  if(!rows.length){alert("No upcoming matches to export.");return;}
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CricketMatchManager//EN"];
+  rows.forEach(r=>{const desc=[r.camera,r.operator&&"Operator: "+dispName(r.operator),r.stream_platforms&&"Live: "+r.stream_platforms,r.stream_link].filter(Boolean).join("\n");
+    L.push("BEGIN:VEVENT","UID:"+r.id+"@cricketmatchapp","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z","DTSTART:"+icsT(startOf(r)),"DTEND:"+icsT(endOf(r)),"SUMMARY:"+icsE(r.match+" ("+r.series+")"),"DESCRIPTION:"+icsE(desc),"END:VEVENT");});
+  L.push("END:VCALENDAR");downloadBlob(new Blob([L.join("\r\n")],{type:"text/calendar"}),"Cricket_Matches.ics");
+});
+
+/* admin tools */
+const sv=v=>{if(v&&typeof v==="object")v=JSON.stringify(v);v=String(v??"");return v.length>40?v.slice(0,40)+"...":v;};
+const rpc=async(n,a)=>{const {data,error}=await client.rpc(n,a||{});if(error){alert(error.message);return null;}return data===null?true:data;};
+function renderAdmin2(){
+  $("adm2").innerHTML=`<h3>Storage &amp; health</h3><div id="hlth">Loading...</div>
+  <h3>Activity log</h3><div class="actions" style="margin:0 0 8px"><button data-a="log">Refresh log</button></div><div id="logBox"></div>
+  <h3>Backups (weekly + on demand)</h3><div class="actions" style="margin:0 0 8px"><button data-a="bk" class="primary">Backup now</button><button data-a="bkl">Refresh list</button></div><div id="bkBox"></div>
+  <h3>Telegram daily schedule (India time)</h3><div class="grid"><label>Bot token<input id="tgTok" type="password" placeholder="leave blank to keep saved"></label><label>Chat ID<input id="tgChat"></label><label>Send daily at<input id="tgTime" type="time" value="08:00"></label><label class="inline-check"><input type="checkbox" id="tgOn"> Enabled</label></div><div class="actions"><button data-a="tgs" class="primary">Save</button><button data-a="tgf">Find chat ID automatically</button><button data-a="tgt">Send test now</button></div><p id="tgMsg" class="rem-note"></p>
+  <h3>Pre-match alerts (Telegram / WhatsApp)</h3>
+  <div class="grid"><label>Alert before match<select id="alLead"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="120">2 hours</option></select></label><label class="inline-check" style="align-self:end"><input type="checkbox" id="alTg"> Telegram (uses bot token + chat ID above)</label></div>
+  <div class="grid"><label>WhatsApp number (country code, no +, e.g. 919876543210)<input id="alPh" inputmode="numeric"></label><label>CallMeBot API key<input id="alKey" type="password" placeholder="paste key"></label><label class="inline-check" style="align-self:end"><input type="checkbox" id="alWa"> WhatsApp</label></div>
+  <div class="actions"><button data-a="als" class="primary">Save alerts</button><button data-a="alt">Send test alert</button></div><p id="alMsg" class="rem-note">Checked every 5 minutes (India time). WhatsApp uses the free CallMeBot service (unofficial): see README for the 1-minute setup.</p>
+  <h3>Share links (read-only)</h3><div class="grid"><label>Series (blank = all)<input id="shSeries"></label><label>Label<input id="shLabel"></label><div class="actions" style="margin:0;align-items:end"><button data-a="shc" class="primary">Create link</button></div></div><div id="shBox"></div>`;
+  loadHealth();loadLog();loadBackups();loadTg();loadAlerts();loadShares();
+}
+async function loadHealth(){const {data,error}=await client.rpc("db_health"),b=$("hlth");if(!b)return;if(error){b.textContent=error.message;return;}
+  const mb=data.db_bytes/1048576,pct=Math.min(100,mb/500*100);
+  b.innerHTML=`<div class="cbar" style="height:14px"><i style="width:${pct}%;${pct>80?"background:var(--leather)":""}"></i></div><p class="rem-note">${mb.toFixed(1)} MB of 500 MB used (${pct.toFixed(1)}%) | ${data.matches} matches | ${data.log_rows} log rows | ${data.backups} backups${pct>80?" - WARNING: almost full":""}<br>Free Supabase projects pause after about 7 days without activity.</p>`;}
+async function loadLog(){const {data,error}=await client.from("activity_log").select("*").order("at",{ascending:false}).limit(60),b=$("logBox");if(!b)return;if(error){b.textContent=error.message;return;}
+  b.innerHTML=(data||[]).map(l=>{const d=l.details||{},ch=(l.action==="updated"||l.action==="permissions");
+    const det=Object.entries(d).filter(([k])=>k!=="updated_at").map(([k,v])=>ch?`${esc(k)}: ${esc(sv(v.old))} &rarr; ${esc(sv(v.new))}`:esc(k+": "+sv(v))).join("; ");
+    return `<div class="att-item" style="border-left-color:var(--turf)"><div><strong>${esc(l.match_name||"")}</strong><small>${esc(new Date(l.at).toLocaleString())} | ${esc(dispName(l.user_email)||"system")} | ${esc(l.action)}</small><small>${det}</small></div></div>`;}).join("")||'<p class="empty">No activity yet.</p>';}
+async function loadBackups(){const {data,error}=await client.from("backups").select("id,created_at,row_count").order("created_at",{ascending:false}).limit(10),b=$("bkBox");if(!b)return;if(error){b.textContent=error.message;return;}
+  b.innerHTML=(data||[]).map(x=>`<div class="att-item" style="border-left-color:var(--turf)"><div>${esc(new Date(x.created_at).toLocaleString())} - ${x.row_count} matches</div><button data-a="bkd" data-id="${x.id}">Download</button></div>`).join("")||'<p class="empty">No backups yet. Tap Backup now.</p>';}
+async function loadTg(){const {data,error}=await client.rpc("get_telegram");if(error||!data||!$("tgChat"))return;$("tgChat").value=data.chat||"";$("tgTime").value=data.time||"08:00";$("tgOn").checked=!!data.enabled;$("tgTok").placeholder=data.token_set?"token saved (leave blank to keep)":"paste bot token";}
+async function loadAlerts(){const {data,error}=await client.rpc("get_alerts");if(error||!data||!$("alLead"))return;$("alLead").value=String(data.lead);$("alTg").checked=!!data.tg;$("alWa").checked=!!data.wa;$("alPh").value=data.wa_phone||"";$("alKey").placeholder=data.wa_key_set?"key saved (leave blank to keep)":"paste key";}
+const shareUrl=t=>location.origin+location.pathname.replace(/[^/]*$/,"")+"share.html?t="+t;
+async function loadShares(){const {data,error}=await client.from("shares").select("*").order("created_at",{ascending:false}),b=$("shBox");if(!b)return;if(error){b.textContent=error.message;return;}
+  b.innerHTML=(data||[]).map(x=>`<div class="att-item" style="border-left-color:var(--turf)"><div><strong>${esc(x.label||x.series||"All series")}</strong><small style="word-break:break-all">${esc(shareUrl(x.token))}</small></div><div><button data-a="shy" data-t="${esc(x.token)}">Copy</button> <button class="danger" data-a="shr" data-t="${esc(x.token)}">Revoke</button></div></div>`).join("")||'<p class="empty">No share links yet.</p>';}
+$("adm2").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;
+  if(a==="log")loadLog();
+  else if(a==="bkl")loadBackups();
+  else if(a==="bk"){if(await rpc("make_backup")){await loadBackups();loadHealth();}}
+  else if(a==="bkd"){const {data,error}=await client.from("backups").select("data,created_at").eq("id",b.dataset.id).single();if(error){alert(error.message);return;}
+    downloadBlob(new Blob([JSON.stringify({app:"Cricket Match Manager",version:27,exported_at:data.created_at,matches:data.data},null,2)],{type:"application/json"}),`Cricket_Match_Backup_${String(data.created_at).slice(0,10)}.json`);}
+  else if(a==="tgs"){const r=await rpc("save_telegram",{p_token:$("tgTok").value.trim(),p_chat:$("tgChat").value.trim(),p_time:$("tgTime").value||"08:00",p_enabled:$("tgOn").checked});if(r){$("tgMsg").textContent="Saved.";$("tgTok").value="";loadTg();}}
+  else if(a==="tgt"){const r=await rpc("send_telegram_test");if(r)$("tgMsg").textContent="Result: "+r+" (check your Telegram)";}
+  else if(a==="tgf"){$("tgMsg").textContent="Looking for your Telegram group... wait 6 seconds";const st=await rpc("telegram_detect_start");if(!st){$("tgMsg").textContent="";return;}await new Promise(r=>setTimeout(r,6000));const r=await rpc("telegram_detect_finish");if(r){$("tgMsg").textContent=String(r);loadTg();}}
+  else if(a==="als"){const r=await rpc("save_alerts",{p_lead:+$("alLead").value,p_tg:$("alTg").checked,p_wa_phone:$("alPh").value.trim(),p_wa_key:$("alKey").value.trim(),p_wa_on:$("alWa").checked});if(r){$("alMsg").textContent="Saved. Alerts run every 5 minutes.";$("alKey").value="";loadAlerts();}}
+  else if(a==="alt"){const r=await rpc("send_alert_test");if(r)$("alMsg").textContent="Result: "+r;}
+  else if(a==="shc"){const t=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now()).replace(/-/g,"").slice(0,20);
+    const {error}=await client.from("shares").insert({token:t,series:$("shSeries").value.trim()||null,label:$("shLabel").value.trim()||null});if(error){alert(error.message);return;}loadShares();}
+  else if(a==="shy"){try{await navigator.clipboard.writeText(shareUrl(b.dataset.t));b.textContent="Copied";}catch(x){prompt("Copy this link:",shareUrl(b.dataset.t));}}
+  else if(a==="shr"){if(!confirm("Revoke this link? Anyone using it will lose access."))return;const {error}=await client.from("shares").delete().eq("token",b.dataset.t);if(error)alert(error.message);loadShares();}
+});
+const _ap24=applyPerms;
+applyPerms=function(){_ap24();const adm=isAdmin()&&!ME.legacy;$("secAdmin2").classList.toggle("hidden",!adm);if(adm)renderAdmin2();if(!ME.legacy)loadTeam();};
+
+/* ================= v26: separate pages + live countdown popup ================= */
+const PAGES=[["home","Home"],["alerts","Alerts"],["matches","Matches"],["add","Add"],["bulk","Bulk"],["fetch","Fetch"],["calendar","Calendar"],["planner","Planner"],["stats","Stats"],["users","Users"],["tools","Admin"]];
+let curPage="home";
+function pageOk(id){
+  if(!PAGES.some(p=>p[0]===id))return false;
+  if(id==="add")return can("add")||can("edit");
+  if(id==="bulk"||id==="fetch")return can("add");
+  if(id==="users"||id==="tools")return isAdmin()&&!(ME&&ME.legacy);
+  return true;
+}
+const navBadges={};
+function buildNav(){
+  $("mainNav").innerHTML=PAGES.filter(p=>pageOk(p[0])).map(([id,l])=>`<button data-p="${id}"${id===curPage?' class="on"':""}>${l}${navBadges[id]?`<i class="nb">${navBadges[id]}</i>`:""}</button>`).join("");
+}
+function setBadge(id,n){navBadges[id]=n||"";buildNav();}
+function showPage(id){
+  if(!pageOk(id))id="home";
+  curPage=id;
+  document.querySelectorAll("[data-page]").forEach(e=>e.classList.toggle("pghide",e.dataset.page!==id));
+  document.querySelectorAll("#mainNav button").forEach(b=>b.classList.toggle("on",b.dataset.p===id));
+  if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);
+  const on=document.querySelector("#mainNav button.on");if(on&&on.scrollIntoView)on.scrollIntoView({inline:"center",block:"nearest"});
+  window.scrollTo(0,0);
+}
+$("mainNav").addEventListener("click",e=>{const b=e.target.closest("button[data-p]");if(b)location.hash=b.dataset.p;});
+window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)||"home"));
+const _ra26=renderAttention;
+renderAttention=function(rows){_ra26(rows);const m=document.title.match(/^\((\d+)\)/);setBadge("alerts",m?m[1]:"");};
+const _ru26=renderUsers;
+renderUsers=function(){_ru26();setBadge("users",USERS.filter(u=>!u.approved&&u.role!=="admin").length);};
+
+/* live countdown popup */
+const CD_KEY="cmm_cd",pad2=n=>String(n).padStart(2,"0");
+const cdCfg=()=>{try{return Object.assign({on:true,win:60},JSON.parse(localStorage.getItem(CD_KEY)||"{}"));}catch(e){return {on:true,win:60};}};
+const cdSave=()=>{try{localStorage.setItem(CD_KEY,JSON.stringify({on:$("cdOn").checked,win:+$("cdWin").value}));}catch(e){}cdDismissed.clear();cdLast=0;cdSig="";cdTick();};
+const cdDismissed=new Set(),cdBuzzed=new Set();let cdList=[],cdLast=0,cdSig="";
+const hms=ms=>{const t=Math.max(0,Math.floor(ms/1000));return pad2(Math.floor(t/3600))+":"+pad2(Math.floor(t%3600/60))+":"+pad2(t%60);};
+(()=>{const c=cdCfg();$("cdOn").checked=c.on;$("cdWin").value=String(c.win);})();
+$("cdOn").addEventListener("change",cdSave);$("cdWin").addEventListener("change",cdSave);
+function cdRefresh(){
+  const c=cdCfg(),now=Date.now();cdList=[];if(!c.on)return;
+  for(const r of allMatches){
+    const st=effStatus(r);if(st!=="Scheduled"&&st!=="Recording")continue;
+    if(!r.match_time||(mineOnly()&&!isMine(r)))continue;
+    const start=startOf(r).getTime(),d=start-now;
+    if(d>c.win*60000||d<-300000)continue;
+    const key=r.id+"|"+r.match_date+"|"+String(r.match_time).slice(0,5);
+    if(cdDismissed.has(key))continue;
+    cdList.push({r,start,key});
+  }
+  cdList.sort((a,b)=>a.start-b.start);cdList=cdList.slice(0,3);
+}
+function cdTick(){
+  const pop=$("cdPop");
+  if($("app").classList.contains("hidden")){pop.classList.add("hidden");return;}
+  const now=Date.now();
+  if(now-cdLast>10000){cdRefresh();cdLast=now;}
+  const items=cdList.filter(x=>!cdDismissed.has(x.key));
+  if(!items.length){pop.classList.add("hidden");cdSig="";return;}
+  pop.classList.remove("hidden");
+  const sig=items.map(x=>x.key+(x.start<=now?"n":"w")).join("#");
+  if(sig!==cdSig){
+    cdSig=sig;
+    pop.innerHTML=items.map(x=>{const r=x.r,n=x.start<=now;return `<div class="cdcard${n?" now":""}"><button class="cdx" data-k="${esc(x.key)}" aria-label="Close">&times;</button><small>${n?"MATCH STARTED":"Match starts in"}</small><div class="cdt" data-k="${esc(x.key)}"></div><strong>${esc(r.match)}</strong><small>${esc(r.series)} | ${esc(fmtTime(r.match_time))}${r.camera?" | "+esc(r.camera):""}${r.operator?" | "+esc(dispName(r.operator)):""}${r.stream_platforms?" | Live: "+esc(r.stream_platforms):""}</small></div>`;}).join("");
+  }
+  items.forEach(x=>{
+    const d=x.start-now,el=pop.querySelector('.cdt[data-k="'+(window.CSS&&CSS.escape?CSS.escape(x.key):x.key)+'"]');
+    if(el)el.textContent=d<=0?"+"+hms(-d):hms(d);
+    if(d<=0&&d>-2000&&!cdBuzzed.has(x.key)){cdBuzzed.add(x.key);try{navigator.vibrate&&navigator.vibrate([300,150,300]);}catch(e){}}
+  });
+}
+$("cdPop").addEventListener("click",e=>{const b=e.target.closest(".cdx");if(b){cdDismissed.add(b.dataset.k);cdSig="";cdLast=0;cdTick();}});
+setInterval(cdTick,1000);
+
+const _ap26=applyPerms;
+applyPerms=function(){_ap26();buildNav();showPage(location.hash.slice(1)||"home");};
+buildNav();
+
+init();
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
