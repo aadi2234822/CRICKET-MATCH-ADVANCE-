@@ -256,7 +256,8 @@ td.remarks-cell{border-bottom:1px solid var(--line);background:transparent}
 <label>Time Zone<select id="afTZ"><option value="local">This device's local time</option><option value="utc">GMT / UTC</option><option value="ist">India (IST)</option></select></label>
 <label class="wide">CricAPI key (saved on this device)<input id="afKey" type="password" placeholder="Free key from cricketdata.org"></label>
 <label>Expected matches (optional)<input id="afExpect" type="number" min="1" placeholder="e.g. 124"></label>
-<label>Extra scan pages per tap (0 = off, max 20)<input id="afMaxPages" type="number" min="0" max="20" value="5"></label>
+<label>Max API hits per tap (1-20)<input id="afMaxPages" type="number" min="1" max="20" value="6"></label>
+<label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="afDeep"> Also scan the full matches list (uses many more hits)</label>
 </div>
 <div id="afPick" class="hidden" style="margin-top:12px"><label>Select the series<select id="afSelect"></select></label></div>
 <div class="actions">
@@ -810,18 +811,34 @@ $("afSearchBtn").addEventListener("click",async()=>{
   }catch(e){afMsg("Error: "+e.message);}
 });
 let afState=null;
-function afMaxPg(){return Math.max(0,Math.min(20,parseInt($("afMaxPages").value,10)||0));}
+function afMaxPg(){return Math.max(1,Math.min(20,parseInt($("afMaxPages").value,10)||3));}
 function afExp(){return parseInt($("afExpect").value,10)||0;}
-async function afScanBatch(){
+// Step 1 (cheap): series_info with offset paging, 25 matches per hit
+async function afSiBatch(){
+  const st=afState,max=afMaxPg(),exp=afExp(); let pg=0;
+  while(!st.siDone&&pg<max&&!(exp&&st.byId.size>=exp)){
+    afMsg("Loading series matches... hit "+(pg+1)+" of max "+max+" | found "+st.byId.size+(exp?" / "+exp:"")+" | API hits used: "+(window._afHits||0));
+    const j=await afCall("series_info",{id:st.id,offset:st.siOff});
+    const arr=(j.data&&j.data.matchList)||j.matchList||[]; if(j.info&&j.info.totalRows) st.siTotal=j.info.totalRows;
+    if(j.info&&j.info.hitsLimit){st.hits=j.info.hitsToday+" / "+j.info.hitsLimit;}
+    let fresh=0; arr.forEach((x,i)=>{const k=x.id||("i"+st.siOff+"_"+i); if(!st.byId.has(k)){st.byId.set(k,x);fresh++;}});
+    st.nInfo+=fresh; pg++;
+    if(!arr.length||!fresh){st.siDone=true;break;}
+    st.siOff+=arr.length; if(st.siTotal&&st.siOff>=st.siTotal) st.siDone=true;
+  }
+}
+// Step 2 (expensive, only if ticked): scan the whole matches list
+async function afDeepBatch(){
   const st=afState,max=afMaxPg(),exp=afExp(); let pg=0;
   while(!st.done&&pg<max&&!(exp&&st.byId.size>=exp)){
-    afMsg("Scanning matches list... page "+(pg+1)+" of "+max+" | found "+st.byId.size+(exp?" / "+exp:"")+" | API hits used: "+(window._afHits||0));
+    afMsg("Deep scan... page "+(pg+1)+" of max "+max+" | found "+st.byId.size+(exp?" / "+exp:"")+" | API hits used: "+(window._afHits||0));
     const jm=await afCall("matches",{offset:st.off}); const arr=jm.data||[]; st.total=(jm.info&&jm.info.totalRows)||st.total;
     arr.forEach(x=>{ if(x.series_id===st.id && !st.byId.has(x.id)){st.byId.set(x.id,x);st.nScan++;} });
     if(!arr.length){st.done=true;break;} st.off+=arr.length; pg++;
     if(st.total&&st.off>=st.total) st.done=true;
   }
 }
+async function afScanBatch(){ await afSiBatch(); if(afState.siDone&&$("afDeep").checked) await afDeepBatch(); }
 function afRender(){
   const st=afState,exp=afExp(); let skipped=0,tmp=[]; afRows=[];
   for(const m of st.byId.values()){ const dt=afIST(m.dateTimeGMT||m.date); if(!dt||!m.name){skipped++;continue;} tmp.push({m,dt,type:afType(m)}); }
@@ -835,10 +852,11 @@ function afRender(){
   $("afPrev").innerHTML=afRows.map(r=>`<tr><td>${fmtDate(r.match_date)}</td><td>${fmtTime(r.match_time)}</td><td>${esc(r.match)}</td><td>${r.odi_t20}</td></tr>`).join("");
   $("afPrevWrap").classList.toggle("hidden",!afRows.length);
   $("afSaveBtn").classList.toggle("hidden",!afRows.length);
-  const reached=exp&&st.byId.size>=exp, more=!st.done&&!reached&&afMaxPg()>0;
+  const reached=exp&&st.byId.size>=exp, deep=$("afDeep").checked, more=!reached&&(!st.siDone||(deep&&!st.done));
   $("afMoreBtn").classList.toggle("hidden",!more);
-  afMsg(afRows.length+" matches found (series info: "+st.nInfo+", extra from scan: "+st.nScan+")"+(skipped?" ("+skipped+" skipped: no date or format)":"")
-    +". API hits used: "+(window._afHits||0)+(reached?". Expected count reached.":(more?". Not all matches found yet: tap Scan more pages to continue (each tap uses up to "+afMaxPg()+" more hits).":(st.done?". Whole matches list scanned.":"")))
+  afMsg(afRows.length+" matches found (from series: "+st.nInfo+(st.nScan?", from full scan: "+st.nScan:"")+")"+(skipped?" ("+skipped+" skipped: no date or format)":"")
+    +". API hits used now: "+(window._afHits||0)+(st.hits?" (today "+st.hits+")":"")+(st.siTotal?". API says this series has "+st.siTotal+" matches.":"")
+    +(reached?" Expected count reached.":(more?" Not all found yet: tap Scan more pages to continue.":(st.nInfo<(exp||0)?" This is everything the API returned for this series. If you expect more, the API data itself is incomplete: use Excel import for the rest.":"")))
     +" Times use the time zone selected above. Review, then tap Save all to app.");
 }
 $("afGetBtn").addEventListener("click",async()=>{
@@ -846,11 +864,8 @@ $("afGetBtn").addEventListener("click",async()=>{
   const sname=$("afSelect").selectedOptions[0].textContent.replace(/\s*\([^()]*\)\s*$/,"").trim();
   afMsg("Loading matches..."); window._afHits=0;
   try{
-    const j=await afCall("series_info",{id});
-    const ml=(j.data&&j.data.matchList)||j.matchList||[]; const byId=new Map(); ml.forEach((x,i)=>byId.set(x.id||("i"+i),x));
-    afState={id,sname,byId,off:0,total:0,done:false,nInfo:ml.length,nScan:0};
-    if(afMaxPg()>0&&!(afExp()&&byId.size>=afExp())) await afScanBatch();
-    afRender();
+    afState={id,sname,byId:new Map(),off:0,total:0,done:false,siOff:0,siTotal:0,siDone:false,nInfo:0,nScan:0,hits:""};
+    await afScanBatch(); afRender();
   }catch(e){afMsg("Error: "+e.message);}
 });
 $("afMoreBtn").addEventListener("click",async()=>{

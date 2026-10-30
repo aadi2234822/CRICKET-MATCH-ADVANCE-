@@ -1,0 +1,37 @@
+TELEGRAM BOT SETUP (one time, about 15 minutes)
+
+1. Supabase SQL Editor: run supabase_sql/12_add_telegram_bot.sql
+
+2. Telegram: open @BotFather > /newbot (or reuse the bot you already use for the daily digest) and copy the bot token.
+
+3. Pick two secret words (any long random text):
+   WEBHOOK_SECRET  (only letters, digits, _ and -)
+   LINK_SECRET     (operators type this once to link their chat)
+
+4. Install the Supabase CLI (https://supabase.com/docs/guides/cli), then in this project folder:
+   supabase login
+   supabase link --project-ref YOUR_PROJECT_REF
+   supabase secrets set TELEGRAM_BOT_TOKEN=123456:ABC... TELEGRAM_WEBHOOK_SECRET=YOUR_WEBHOOK_SECRET BOT_LINK_SECRET=YOUR_LINK_SECRET
+   supabase functions deploy telegram-bot --no-verify-jwt
+
+5. Tell Telegram where the bot lives (paste in a browser, one line, replace the 3 values):
+   https://api.telegram.org/botYOUR_BOT_TOKEN/setWebhook?url=https://YOUR_PROJECT_REF.supabase.co/functions/v1/telegram-bot&secret_token=YOUR_WEBHOOK_SECRET
+   It must answer {"ok":true,...}
+
+6. Each person opens the bot in Telegram and sends:
+   /link YOUR_LINK_SECRET their-app-email@example.com
+   (the email must be an approved user in the app)
+
+7. Commands: /today /tomorrow /mine /pending /rec 12 /up 12 /status 12 Cancelled /platform 12 YouTube
+   Or type: match 12 uploaded
+   The #number shown before each match is the match number to use.
+
+Notes
+- Changing status needs the "status" permission in the app (admins always have it). Viewing needs "view".
+- Every change made from the bot is written to the Activity log as "telegram_bot".
+- Anyone who knows LINK_SECRET and an approved email can link a chat, so share the secret only with your team and change it (supabase secrets set) if it leaks.
+- If you reuse the digest bot, nothing changes for the digest: it only sends messages.
+
+NO-CLI OPTION (easier): Supabase Dashboard > Edge Functions > create a new function named telegram-bot,
+paste the whole file supabase/functions/telegram-bot/PASTE_THIS_IN_DASHBOARD.ts into the editor, turn OFF "Verify JWT", and Deploy.
+Add the 3 secrets under Edge Functions > Secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, BOT_LINK_SECRET). Then continue from step 5.
