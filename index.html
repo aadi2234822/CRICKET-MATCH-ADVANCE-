@@ -52,7 +52,7 @@ button:disabled{opacity:.55;cursor:wait}
 .month-downloads{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
 .month-downloads:empty{display:none}
 .month-download-btn{background:var(--turf);border-color:var(--turf);color:#fff}
-.month-download-btn:hover{background:var(--turf-dark);border-color:var(--turf-dark)}
+.dlpanel{border:1px solid var(--line,#d7ddd3);border-radius:10px;padding:12px;margin:0 0 14px}.dlrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}.dlcols{display:flex;gap:6px 14px;flex-wrap:wrap;margin:8px 0}.dlcols label{display:flex;gap:6px;align-items:center;font-size:14px;margin:0}.month-download-btn:hover{background:var(--turf-dark);border-color:var(--turf-dark)}
 .search{width:320px;display:block}
 .badge{font-family:'Barlow',Arial,sans-serif;font-size:14px;font-weight:700;background:var(--turf);color:#fff;padding:2px 10px;border-radius:20px;vertical-align:middle}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
@@ -255,11 +255,14 @@ td.remarks-cell{border-bottom:1px solid var(--line);background:transparent}
 <label class="wide">Series name<input id="afSeries" placeholder="e.g. Nepal Premier League 2026"></label>
 <label>Time Zone<select id="afTZ"><option value="local">This device's local time</option><option value="utc">GMT / UTC</option><option value="ist">India (IST)</option></select></label>
 <label class="wide">CricAPI key (saved on this device)<input id="afKey" type="password" placeholder="Free key from cricketdata.org"></label>
+<label>Expected matches (optional)<input id="afExpect" type="number" min="1" placeholder="e.g. 124"></label>
+<label>Extra scan pages per tap (0 = off, max 20)<input id="afMaxPages" type="number" min="0" max="20" value="5"></label>
 </div>
 <div id="afPick" class="hidden" style="margin-top:12px"><label>Select the series<select id="afSelect"></select></label></div>
 <div class="actions">
 <button type="button" id="afSearchBtn" class="primary">Search series</button>
 <button type="button" id="afGetBtn" class="hidden">Fetch matches</button>
+<button type="button" id="afMoreBtn" class="hidden">Scan more pages</button>
 <button type="button" id="afSaveBtn" class="primary hidden">Save all to app</button>
 </div>
 <p id="afMsg" style="color:#667085;white-space:pre-line"></p>
@@ -322,6 +325,12 @@ td.remarks-cell{border-bottom:1px solid var(--line);background:transparent}
  <input id="bulkShift" type="number" value="1" title="Days (negative = earlier)" style="width:70px"><button id="bulkShiftBtn">Shift days</button>
  <button id="bulkDelBtn" class="danger">Delete</button><button id="bulkClearBtn">Clear</button></div>
 <div id="monthDownloadButtons" class="month-downloads"></div>
+<div id="dlPanel" class="dlpanel">
+<h3 style="margin:0 0 8px;font-size:16px">Excel download: choose month and columns</h3>
+<div class="dlrow"><select id="dlMonth" aria-label="Month"></select><button type="button" id="dlGoBtn" class="month-download-btn">⬇ Download Excel</button></div>
+<div id="dlCols" class="dlcols"></div>
+<div class="dlrow"><button type="button" class="small-btn" id="dlAll">Select all columns</button><button type="button" class="small-btn" id="dlCore">Only main 9 columns</button></div>
+</div>
 <div class="table-wrap">
 <table><thead><tr><th><input type="checkbox" id="selAll" class="rowchk" title="Select all shown"></th><th>Date</th><th>Time</th><th>Series</th><th>Match</th><th>ODI/T20</th><th>Expected</th><th>Recorded</th><th>Uploaded</th><th>Camera</th><th>Operator</th><th>Live on</th><th>Status</th><th>Checklist</th><th>Remarks</th><th>Action</th></tr></thead>
 <tbody id="matchTable"></tbody></table>
@@ -347,6 +356,12 @@ td.remarks-cell{border-bottom:1px solid var(--line);background:transparent}
  <label class="ck-row"><input type="checkbox" id="ck_thumb">Thumbnail ready</label>
  <label class="ck-row"><input type="checkbox" id="ck_title">Title &amp; description</label>
  <label class="ck-row"><input type="checkbox" id="ck_upl">Uploaded &amp; checked</label>
+ <div id="eqBox" style="margin:8px 0;padding-top:6px;border-top:1px dashed var(--line)"><h4 style="margin:0 0 4px;font-size:14px">Equipment</h4>
+ <label class="ck-row"><input type="checkbox" id="ck_eq_batt">Batteries charged</label>
+ <label class="ck-row"><input type="checkbox" id="ck_eq_card">Memory card ready</label>
+ <label class="ck-row"><input type="checkbox" id="ck_eq_mic">Mic / audio checked</label>
+ <label class="ck-row"><input type="checkbox" id="ck_eq_tri">Tripod / stand</label>
+ <label class="ck-row"><input type="checkbox" id="ck_eq_chg">Charger / power cable</label></div>
  <div style="margin-top:12px;font-weight:700">Live stream platforms</div>
  <div id="strBox" class="strg" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0"></div>
  <label>Live stream link<input id="strLink" type="url" placeholder="https://..."></label>
@@ -580,52 +595,76 @@ function renderMonthDownloadButtons(rows){
   const box=$("monthDownloadButtons");
   box.innerHTML=keys.map(k=>`<button type="button" class="month-download-btn" data-month="${k}">⬇ ${esc(monthLabel(k))} Excel</button>`).join("");
   box.querySelectorAll("[data-month]").forEach(btn=>btn.addEventListener("click",()=>downloadMonthExcel(btn.dataset.month)));
+  buildDlPanel(rows);
 }
 
-function makeExcelWorkbook(rows,key){
-  const blk={style:"thin",color:{rgb:"000000"}}, yel={style:"medium",color:{rgb:"FFD600"}};
+const DL_CORE=["date","time","series","match","type","exp","rec","upl","rem"];
+function dlColDefs(base,left,remStyle){
+  const serial=r=>r.match_date?Math.round((Date.UTC(...r.match_date.split("-").map((x,i)=>i===1?+x-1:+x))-Date.UTC(1899,11,30))/86400000):"";
+  return [
+   {k:"date",h:"Date",w:12.57,f:r=>{const v=serial(r);return v===""?{v:"",t:"s",s:base}:{v,t:"n",z:"dd-mm-yyyy",s:base};}},
+   {k:"time",h:"Time",w:10.43,f:r=>r.match_time?{v:(()=>{const [hh,mm,ss]=String(r.match_time).split(":").map(Number);return ((hh*3600)+(mm*60)+(ss||0))/86400;})(),t:"n",z:"h:mm AM/PM",s:base}:{v:"",t:"s",s:base}},
+   {k:"series",h:"Series",w:39.57,f:r=>({v:r.series||"",t:"s",s:left})},
+   {k:"match",h:"Match",w:65.29,f:r=>({v:r.match||"",t:"s",s:left})},
+   {k:"type",h:"ODI/T20",w:36.14,f:r=>({v:r.odi_t20||"",t:"s",s:left})},
+   {k:"exp",h:"Expected Overs",w:38.43,f:r=>r.expected_overs?{v:r.expected_overs,t:"n",s:left}:{v:"",t:"s",s:left}},
+   {k:"rec",h:"Recorded",w:20.71,f:r=>({v:r.recorded||"",t:"s",s:base})},
+   {k:"upl",h:"Uploaded",w:22.43,f:r=>({v:r.uploaded||"",t:"s",s:base})},
+   {k:"rem",h:"Recording Remarks",w:25.14,f:r=>({v:r.recording_remarks||"",t:"s",s:remStyle})},
+   {k:"status",h:"Status",w:16,f:r=>({v:effStatus(r),t:"s",s:base})},
+   {k:"link",h:"Upload Link",w:40,f:r=>({v:r.video_link||"",t:"s",s:left})},
+   {k:"cam",h:"Camera",w:14,f:r=>({v:r.camera||"",t:"s",s:base})},
+   {k:"op",h:"Operator",w:18,f:r=>({v:dispName(r.operator),t:"s",s:base})},
+   {k:"live",h:"Live Platforms",w:26,f:r=>({v:r.stream_platforms||"",t:"s",s:base})},
+   {k:"slink",h:"Stream Link",w:40,f:r=>({v:r.stream_link||"",t:"s",s:left})}
+  ];
+}
+function makeExcelWorkbook(rows,key,colKeys){
+  const blk={style:"thin",color:{rgb:"000000"}};
   const border={top:blk,bottom:blk,left:blk,right:blk};
   const hdrStyle={font:{name:"Arial",sz:13,bold:true},fill:{patternType:"solid",fgColor:{rgb:"FFC000"}},border,alignment:{horizontal:"center",vertical:"center"}};
   const base={font:{name:"Arial",sz:12},alignment:{horizontal:"center",vertical:"center"}};
   const left={...base,alignment:{horizontal:"left",vertical:"center"}};
-  const remStyle={...left};
-  const heads=["Date","Time","Series","Match","ODI/T20","Expected Overs","Recorded","Uploaded","Recording Remarks","Status","Upload Link","Camera","Operator","Live Platforms","Stream Link"];
-  const aoa=[heads.map(h=>({v:h,t:"s",s:hdrStyle}))];
-  for(const r of rows){
-    const serial=r.match_date?Math.round((Date.UTC(...r.match_date.split("-").map((x,i)=>i===1?+x-1:+x))-Date.UTC(1899,11,30))/86400000):"";
-    aoa.push([
-      serial===""?{v:"",t:"s",s:base}:{v:serial,t:"n",z:"dd-mm-yyyy",s:base},
-      r.match_time?{v:(()=>{const [hh,mm,ss]=String(r.match_time).split(":").map(Number);return ((hh*3600)+(mm*60)+(ss||0))/86400;})(),t:"n",z:"h:mm AM/PM",s:base}:{v:"",t:"s",s:base},
-      {v:r.series||"",t:"s",s:left},{v:r.match||"",t:"s",s:left},
-      {v:r.odi_t20||"",t:"s",s:left},
-      r.expected_overs?{v:r.expected_overs,t:"n",s:left}:{v:"",t:"s",s:left},
-      {v:r.recorded||"",t:"s",s:base},{v:r.uploaded||"",t:"s",s:base},
-      {v:r.recording_remarks||"",t:"s",s:remStyle},{v:effStatus(r),t:"s",s:base},{v:r.video_link||"",t:"s",s:left},{v:r.camera||"",t:"s",s:base},{v:dispName(r.operator),t:"s",s:base},{v:r.stream_platforms||"",t:"s",s:base},{v:r.stream_link||"",t:"s",s:left}
-    ]);
-  }
+  const defs=dlColDefs(base,left,{...left});
+  const sel=(colKeys&&colKeys.length?colKeys:DL_CORE);
+  const cols=defs.filter(d=>sel.includes(d.k));
+  const aoa=[cols.map(c=>({v:c.h,t:"s",s:hdrStyle}))];
+  for(const r of rows) aoa.push(cols.map(c=>c.f(r)));
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws["!cols"]=[12.57,10.43,39.57,65.29,36.14,38.43,20.71,22.43,25.14,16,40,14,18,26,40].map(w=>({wch:w}));
+  ws["!cols"]=cols.map(c=>({wch:c.w}));
   ws["!rows"]=[{hpt:24}];
-  const [year,month]=key.split("-").map(Number);
-  const sheetName=`${MONTH_NAMES[month-1].slice(0,3)}${year}`;
+  let sheetName="Matches";
+  if(key&&key!=="all"){const [year,month]=key.split("-").map(Number);sheetName=`${MONTH_NAMES[month-1].slice(0,3)}${year}`;}
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,sheetName);
   return wb;
 }
+function dlSelectedCols(){const v=[...document.querySelectorAll("#dlCols input:checked")].map(x=>x.value);return v.length?v:DL_CORE;}
+function buildDlPanel(rows){
+  const defs=dlColDefs({}, {}, {});
+  const cur=new Set(dlSelectedCols());
+  if(!$("dlCols").children.length){
+    $("dlCols").innerHTML=defs.map(d=>`<label><input type="checkbox" value="${d.k}"${DL_CORE.includes(d.k)?" checked":""}> ${esc(d.h)}</label>`).join("");
+  }
+  const keys=[...new Set((rows||[]).map(r=>monthKey(r.match_date)).filter(Boolean))].sort().reverse();
+  const old=$("dlMonth").value;
+  $("dlMonth").innerHTML=`<option value="all">All months (every match)</option>`+keys.map(k=>`<option value="${k}">${esc(monthLabel(k))}</option>`).join("");
+  if(old&&[...$("dlMonth").options].some(o=>o.value===old)) $("dlMonth").value=old;
+}
+$("dlAll").addEventListener("click",()=>document.querySelectorAll("#dlCols input").forEach(x=>x.checked=true));
+$("dlCore").addEventListener("click",()=>document.querySelectorAll("#dlCols input").forEach(x=>x.checked=DL_CORE.includes(x.value)));
+$("dlGoBtn").addEventListener("click",()=>downloadMonthExcel($("dlMonth").value||"all"));
 
 async function downloadMonthExcel(key){
   if(typeof XLSX==="undefined"){alert("Excel library failed to load. Check your internet connection and refresh the page.");return;}
-  const rows=(allMatches||[]).filter(r=>monthKey(r.match_date)===key)
+  const rows=(allMatches||[]).filter(r=>key==="all"||monthKey(r.match_date)===key)
     .sort((a,b)=>String(a.match_date).localeCompare(String(b.match_date))||String(a.match_time||"99").localeCompare(String(b.match_time||"99"))||Number(a.seq||0)-Number(b.seq||0));
-  if(!rows.length){alert("No matches found for "+monthLabel(key)+".");return;}
-  const wb=makeExcelWorkbook(rows,key);
-  const [year,month]=key.split("-").map(Number);
-  const fname=`Cricket_Matches_${MONTH_NAMES[month-1]}_${year}.xlsx`;
+  if(!rows.length){alert("No matches found"+(key==="all"?".":" for "+monthLabel(key)+"."));return;}
+  const wb=makeExcelWorkbook(rows,key,dlSelectedCols());
+  let fname="Cricket_Matches_All.xlsx";
+  if(key!=="all"){const [year,month]=key.split("-").map(Number);fname=`Cricket_Matches_${MONTH_NAMES[month-1]}_${year}.xlsx`;}
   const arr=XLSX.write(wb,{bookType:"xlsx",type:"array"});
-  const blob=new Blob([arr],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-  const url=URL.createObjectURL(blob), link=document.createElement("a");
-  link.href=url; link.download=fname; document.body.appendChild(link); link.click();
-  setTimeout(()=>{link.remove();URL.revokeObjectURL(url);},5000);
+  downloadBlob(new Blob([arr],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fname);
 }
 
 /* ---------- Dashboard / Calendar / Backup / Report / Reschedule history ---------- */
@@ -651,7 +690,7 @@ function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.
 $("backupBtn").addEventListener("click",()=>{const payload={app:"Cricket Match Manager",version:27,exported_at:new Date().toISOString(),matches:allMatches};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`Cricket_Match_Backup_${new Date().toISOString().slice(0,10)}.json`);});
 $("restoreBtn").addEventListener("click",()=>$("backupInput").click());
 $("backupInput").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());const rows=Array.isArray(obj)?obj:obj.matches;if(!Array.isArray(rows))throw new Error("Backup file does not contain a matches array.");const seen=new Set(allMatches.map(matchKey)),out=[];let dup=0,bad=0;for(const x of rows){const d=String(x.match_date||"").slice(0,10),type=String(x.odi_t20||"").toUpperCase(),series=String(x.series||"").trim(),match=String(x.match||"").trim();if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!series||!match||!['ODI','T20'].includes(type)){bad++;continue;}const r={format:x.format||"Cricket",match_date:d,match_time:x.match_time||null,series,match,odi_t20:type,expected_overs:overs(type),recorded:x.recorded==="Done"?"Done":"Pending",uploaded:x.uploaded==="Done"?"Done":"Pending",recording_remarks:x.recording_remarks||""};if(hasStatus!==false)r.status=ALL_ST.includes(x.status)?x.status:(r.uploaded==="Done"?"Uploaded":r.recorded==="Done"?"Recorded":"Scheduled");if(hasExtra!==false){r.video_link=safeLink(x.video_link);r.checklist=(x.checklist&&typeof x.checklist==="object")?x.checklist:{};}if(hasCam!==false)r.camera=normCam(x.camera);if(hasV24!==false){r.operator=x.operator||"";r.stream_platforms=normPlats(x.stream_platforms);r.stream_link=safeLink(x.stream_link);}const k=matchKey(r);if(seen.has(k)){dup++;continue;}seen.add(k);out.push(r);}if(!out.length){alert(`Nothing to restore. Duplicates: ${dup}; invalid rows: ${bad}.`);return;}if(!confirm(`Restore ${out.length} match(es)? Duplicates skipped: ${dup}; invalid rows skipped: ${bad}.`))return;let saved=0;for(let i=0;i<out.length;i+=100){const {error}=await client.from("matches").insert(out.slice(i,i+100));if(error)throw error;saved+=Math.min(100,out.length-i);}alert(`Restored ${saved} match(es). Duplicates skipped: ${dup}; invalid rows: ${bad}.`);await render();}catch(err){alert("Restore failed: "+(err.message||err));}e.target.value="";});
-$("rangeExcelBtn").addEventListener("click",()=>{if(typeof XLSX==="undefined"){alert("Excel library did not load. Check internet and refresh.");return;}const from=$("reportFrom").value,to=$("reportTo").value;if(from&&to&&from>to){alert("Report start date must be before end date.");return;}const rows=allMatches.filter(r=>(!from||r.match_date>=from)&&(!to||r.match_date<=to));if(!rows.length){alert("No matches found in the selected date range.");return;}const wb=makeExcelWorkbook(rows,monthKey(rows[0].match_date)||"2026-01");const arr=XLSX.write(wb,{bookType:"xlsx",type:"array"});downloadBlob(new Blob([arr],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Cricket_Matches_${from||"start"}_to_${to||"end"}.xlsx`);});
+$("rangeExcelBtn").addEventListener("click",()=>{if(typeof XLSX==="undefined"){alert("Excel library did not load. Check internet and refresh.");return;}const from=$("reportFrom").value,to=$("reportTo").value;if(from&&to&&from>to){alert("Report start date must be before end date.");return;}const rows=allMatches.filter(r=>(!from||r.match_date>=from)&&(!to||r.match_date<=to));if(!rows.length){alert("No matches found in the selected date range.");return;}const wb=makeExcelWorkbook(rows,monthKey(rows[0].match_date)||"all",dlSelectedCols());const arr=XLSX.write(wb,{bookType:"xlsx",type:"array"});downloadBlob(new Blob([arr],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),`Cricket_Matches_${from||"start"}_to_${to||"end"}.xlsx`);});
 async function showRescheduleHistory(id){const {data,error}=await client.from("match_reschedule_history").select("*").eq("match_id",id).order("changed_at",{ascending:false});if(error){alert("Run setup_reschedule_history.sql in Supabase first. "+error.message);return;}if(!data.length){alert("No reschedule history for this match.");return;}alert(data.map(x=>`${new Date(x.changed_at).toLocaleString()}\n${fmtDate(x.old_date)} ${fmtTime(x.old_time)} → ${fmtDate(x.new_date)} ${fmtTime(x.new_time)}`).join("\n\n"));}
 window.showRescheduleHistory=showRescheduleHistory;
 
@@ -741,6 +780,7 @@ async function afCall(path,params){
   const key=$("afKey").value.trim(); if(!key) throw new Error("Enter your CricAPI key.");
   localStorage.setItem("cricapi_key",key);
   const u=AF+path+"?"+new URLSearchParams({apikey:key,...params});
+  window._afHits=(window._afHits||0)+1;
   const r=await fetch(u); const j=await r.json();
   if(j.status&&j.status!=="success") throw new Error(j.reason||"API error");
   return j;
@@ -762,45 +802,60 @@ $("afSearchBtn").addEventListener("click",async()=>{
   const q=$("afSeries").value.trim(); if(!q){alert("Enter a series name.");return;}
   afMsg("Searching..."); $("afSaveBtn").classList.add("hidden"); $("afPrevWrap").classList.add("hidden");
   try{
-    const j=await afCall("series",{offset:0,search:q});
-    const list=j.data||[];
+    window._afHits=0; const j0=await afCall("series",{offset:0,search:q}); const list=j0.data||[];
     if(!list.length){afMsg("No series found with that name. Try a shorter name.");$("afPick").classList.add("hidden");$("afGetBtn").classList.add("hidden");return;}
     $("afSelect").innerHTML=list.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} (${esc(x.startDate||"")} - ${esc(x.endDate||"")})</option>`).join("");
     $("afPick").classList.remove("hidden"); $("afGetBtn").classList.remove("hidden");
-    afMsg(list.length+" series found. Select the right one, then tap Fetch matches.");
+    afMsg(list.length+" series found"+(list.length>=25?" (first 25 only; type a more specific name if yours is missing)":"")+". Select the right one, then tap Fetch matches.");
   }catch(e){afMsg("Error: "+e.message);}
 });
+let afState=null;
+function afMaxPg(){return Math.max(0,Math.min(20,parseInt($("afMaxPages").value,10)||0));}
+function afExp(){return parseInt($("afExpect").value,10)||0;}
+async function afScanBatch(){
+  const st=afState,max=afMaxPg(),exp=afExp(); let pg=0;
+  while(!st.done&&pg<max&&!(exp&&st.byId.size>=exp)){
+    afMsg("Scanning matches list... page "+(pg+1)+" of "+max+" | found "+st.byId.size+(exp?" / "+exp:"")+" | API hits used: "+(window._afHits||0));
+    const jm=await afCall("matches",{offset:st.off}); const arr=jm.data||[]; st.total=(jm.info&&jm.info.totalRows)||st.total;
+    arr.forEach(x=>{ if(x.series_id===st.id && !st.byId.has(x.id)){st.byId.set(x.id,x);st.nScan++;} });
+    if(!arr.length){st.done=true;break;} st.off+=arr.length; pg++;
+    if(st.total&&st.off>=st.total) st.done=true;
+  }
+}
+function afRender(){
+  const st=afState,exp=afExp(); let skipped=0,tmp=[]; afRows=[];
+  for(const m of st.byId.values()){ const dt=afIST(m.dateTimeGMT||m.date); if(!dt||!m.name){skipped++;continue;} tmp.push({m,dt,type:afType(m)}); }
+  const known=tmp.map(x=>x.type).filter(Boolean);
+  const guess=known.length?(known.filter(t=>t==="ODI").length>known.length/2?"ODI":"T20"):"";
+  for(const x of tmp){
+    const type=x.type||guess; if(!type){skipped++;continue;}
+    afRows.push({format:"Cricket",match_date:x.dt.date,match_time:x.dt.time,series:st.sname,match:String(x.m.name).trim(),odi_t20:type,expected_overs:overs(type),recorded:"Pending",uploaded:"Pending",recording_remarks:""});
+  }
+  afRows.sort((a,b)=>(a.match_date+a.match_time).localeCompare(b.match_date+b.match_time));
+  $("afPrev").innerHTML=afRows.map(r=>`<tr><td>${fmtDate(r.match_date)}</td><td>${fmtTime(r.match_time)}</td><td>${esc(r.match)}</td><td>${r.odi_t20}</td></tr>`).join("");
+  $("afPrevWrap").classList.toggle("hidden",!afRows.length);
+  $("afSaveBtn").classList.toggle("hidden",!afRows.length);
+  const reached=exp&&st.byId.size>=exp, more=!st.done&&!reached&&afMaxPg()>0;
+  $("afMoreBtn").classList.toggle("hidden",!more);
+  afMsg(afRows.length+" matches found (series info: "+st.nInfo+", extra from scan: "+st.nScan+")"+(skipped?" ("+skipped+" skipped: no date or format)":"")
+    +". API hits used: "+(window._afHits||0)+(reached?". Expected count reached.":(more?". Not all matches found yet: tap Scan more pages to continue (each tap uses up to "+afMaxPg()+" more hits).":(st.done?". Whole matches list scanned.":"")))
+    +" Times use the time zone selected above. Review, then tap Save all to app.");
+}
 $("afGetBtn").addEventListener("click",async()=>{
   const id=$("afSelect").value; if(!id) return;
   const sname=$("afSelect").selectedOptions[0].textContent.replace(/\s*\([^()]*\)\s*$/,"").trim();
-  afMsg("Loading matches..."); 
+  afMsg("Loading matches..."); window._afHits=0;
   try{
     const j=await afCall("series_info",{id});
-    let ml=(j.data&&j.data.matchList)||j.matchList||[];
-    if(!ml.length){ // fallback: search the matches list by series_id
-      let off=0,total=1e9,pages=0;
-      while(off<total&&pages<20){
-        afMsg("Series info was empty. Searching the matches list... (page "+(pages+1)+")");
-        const jm=await afCall("matches",{offset:off});
-        const arr=jm.data||[]; total=(jm.info&&jm.info.totalRows)||0;
-        ml=ml.concat(arr.filter(x=>x.series_id===id));
-        if(!arr.length) break; off+=arr.length; pages++;
-      }
-    }
-    afRows=[]; let skipped=0, tmp=[];
-    for(const m of ml){ const dt=afIST(m.dateTimeGMT||m.date); if(!dt||!m.name){skipped++;continue;} tmp.push({m,dt,type:afType(m)}); }
-    const known=tmp.map(x=>x.type).filter(Boolean);
-    const guess=known.length?(known.filter(t=>t==="ODI").length>known.length/2?"ODI":"T20"):"";
-    for(const x of tmp){
-      const type=x.type||guess; if(!type){skipped++;continue;}
-      afRows.push({format:"Cricket",match_date:x.dt.date,match_time:x.dt.time,series:sname,match:String(x.m.name).trim(),odi_t20:type,expected_overs:overs(type),recorded:"Pending",uploaded:"Pending",recording_remarks:""});
-    }
-    afRows.sort((a,b)=>(a.match_date+a.match_time).localeCompare(b.match_date+b.match_time));
-    $("afPrev").innerHTML=afRows.map(r=>`<tr><td>${fmtDate(r.match_date)}</td><td>${fmtTime(r.match_time)}</td><td>${esc(r.match)}</td><td>${r.odi_t20}</td></tr>`).join("");
-    $("afPrevWrap").classList.toggle("hidden",!afRows.length);
-    $("afSaveBtn").classList.toggle("hidden",!afRows.length);
-    afMsg(afRows.length+" matches found"+(skipped?" ("+skipped+" skipped: no date or format)":"")+". Times use the time zone selected above. Review, then tap Save all to app.");
+    const ml=(j.data&&j.data.matchList)||j.matchList||[]; const byId=new Map(); ml.forEach((x,i)=>byId.set(x.id||("i"+i),x));
+    afState={id,sname,byId,off:0,total:0,done:false,nInfo:ml.length,nScan:0};
+    if(afMaxPg()>0&&!(afExp()&&byId.size>=afExp())) await afScanBatch();
+    afRender();
   }catch(e){afMsg("Error: "+e.message);}
+});
+$("afMoreBtn").addEventListener("click",async()=>{
+  if(!afState) return; $("afMoreBtn").classList.add("hidden");
+  try{ await afScanBatch(); afRender(); }catch(e){afMsg("Error: "+e.message);$("afMoreBtn").classList.remove("hidden");}
 });
 $("afSaveBtn").addEventListener("click",async()=>{
   if(!afRows.length) return;
@@ -1015,11 +1070,11 @@ $("bulkShiftBtn").addEventListener("click",async()=>{
 $("bulkDelBtn").addEventListener("click",async()=>{const rows=selRows();if(!rows.length)return;if(!confirm(`Delete ${rows.length} selected match(es)?`))return;await deleteRows(rows,`${rows.length} match(es) deleted`);});
 
 /* ================= v21: checklist + upload link ================= */
-const CK=["rec","trim","thumb","title","upl"];
+const CK=["rec","trim","thumb","title","upl","eq_batt","eq_card","eq_mic","eq_tri","eq_chg"];
 const ckOf=r=>(r.checklist&&typeof r.checklist==="object")?r.checklist:{};
 const ckCount=r=>CK.filter(k=>ckOf(r)[k]).length;
 const safeLink=u=>/^https?:\/\//i.test(String(u||"").trim())?String(u).trim():"";
-function ckCell(r){const n=ckCount(r),l=safeLink(r.video_link);return `<button class="small-btn" onclick="openCk('${r.id}')">${n}/5</button>`+(l?` <a href="${esc(l)}" target="_blank" rel="noopener">&#9654; link</a>`:"");}
+function ckCell(r){const n=CK.slice(0,5).filter(k=>ckOf(r)[k]).length,e=CK.slice(5).filter(k=>ckOf(r)[k]).length,l=safeLink(r.video_link);return `<button class="small-btn" onclick="openCk('${r.id}')">${n}/5${e?" · 🧰"+e+"/5":""}</button>`+(l?` <a href="${esc(l)}" target="_blank" rel="noopener">&#9654; link</a>`:"");}
 window.openCk=id=>{const r=allMatches.find(x=>x.id===id);if(!r)return;ckId=id;$("ckTitle").textContent=r.match;CK.forEach(k=>$("ck_"+k).checked=!!ckOf(r)[k]);$("ckLink").value=r.video_link||"";{const pl=(r.stream_platforms||"").split(", ");document.querySelectorAll(".str-p").forEach(c=>c.checked=pl.includes(c.value));$("strLink").value=r.stream_link||"";$("genOut").classList.add("hidden");}$("ckModal").classList.remove("hidden");};
 $("ckCancel").addEventListener("click",()=>$("ckModal").classList.add("hidden"));
 $("ckModal").addEventListener("click",e=>{if(e.target===$("ckModal"))$("ckModal").classList.add("hidden");});
@@ -1074,7 +1129,7 @@ function applyPerms(){
   const show=(id,on)=>{const e=$(id);if(e)e.classList.toggle("hidden",!on);};
   show("secAuto",can("add"));show("secBulk",can("add"));show("secEntry",can("add")||can("edit"));
   show("importBtn",can("add"));show("restoreBtn",can("add"));show("backupBtn",can("export"));show("clearAllBtn",isAdmin());
-  show("rangeExcelBtn",can("export"));show("reportBox",can("export"));show("monthDownloadButtons",can("export"));
+  show("rangeExcelBtn",can("export"));show("reportBox",can("export"));show("monthDownloadButtons",can("export"));show("dlPanel",can("export"));
   show("bulkStatus",can("status"));show("bulkStatusBtn",can("status"));show("bulkShift",can("edit"));show("bulkShiftBtn",can("edit"));show("bulkDelBtn",can("delete"));
   show("secAdmin",isAdmin()&&!ME.legacy);
   const rb=$("roleBadge");rb.classList.toggle("hidden",!!ME.legacy);rb.textContent=ME.role==="admin"?"Admin":"User";
@@ -1396,5 +1451,6 @@ init();
 
 
 </script>
+<script src="addons.js"></script>
 </body>
 </html>

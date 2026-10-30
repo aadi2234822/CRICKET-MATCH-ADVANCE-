@@ -134,3 +134,11 @@ The existing auto-fetch tool in this version uses CricAPI (cricketdata.org) and 
 
 DOWNLOAD NOTE
 This app uses browser file downloads for Excel and JSON. If Acode's embedded browser reports that blob URLs are unsupported, open the app in Chrome or another full browser to download files.
+
+=== v31 (new) ===
+Setup: run supabase_sql/10_add_v31.sql once in Supabase (recycle bin + richer Telegram digest).
+New pages: "My Day" (operator's today/tomorrow/pending matches with one-tap status) and "Extras".
+Extras page: share schedule (WhatsApp / copy / PDF / PNG), operator payout tracker (+Excel),
+CricAPI result/time sync (preview, then apply), Telegram digest, recycle bin (30 days), dark mode, Hindi/English.
+Stats page: series progress bars. Match checklist: equipment items. Operator double-booking warning on assign.
+Excel download panel: pick any month and columns. Auto fetch merges series_info with the full matches list.

@@ -1,7 +1,7 @@
 /* Cricket Match Manager v24 service worker: app-shell cache + offline support.
    Supabase / CricAPI requests are never cached (always live data). */
-const CACHE = "cmm-v27";
-const SHELL = ["./", "index.html", "manifest.json", "animations.css", "icon-192.png", "icon-512.png"];
+const CACHE = "cmm-v31";
+const SHELL = ["./", "index.html", "manifest.json", "animations.css", "addons.js", "icon-192.png", "icon-512.png"];
 const CDN = ["cdn.jsdelivr.net", "unpkg.com", "fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", e => {
